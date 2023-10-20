@@ -11,6 +11,8 @@ class Rail():
         Rail.rail_img.clip_draw(0, 0, 85, 208, WIDTH // 4, HEIGHT // 2, WIDTH // 2, HEIGHT)
         Rail.rail_img.clip_composite_draw(0, 0, 85, 208, 0, 'h', WIDTH // 4 * 3, HEIGHT // 2, WIDTH // 2, HEIGHT)
 
+
+
 open_canvas()
 
 # get screen size
@@ -22,6 +24,17 @@ while True:
 
     rail = Rail()
     rail.draw()
+
+    # draw title sonic
+    title_sonic = load_image('../resource/title_sonic(1).png')
+    # title
+    # width : 260, height : 155
+    title_sonic.clip_draw(225, 80, 260, 155, WIDTH // 2, HEIGHT // 3 * 2, WIDTH // 2, HEIGHT // 2)
+
+    # sonic
+    # animation : 5
+    # size = 100
+    title_sonic.clip_draw(470, 260, 95, 130, WIDTH // 2, HEIGHT // 4 * 3)
 
     update_canvas()
     delay(0.1)
