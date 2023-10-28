@@ -27,29 +27,44 @@ def handle_events():
 WIDTH = 900
 HEIGHT = 800
 
-open_canvas(WIDTH, HEIGHT)
-
 running = True
+
+open_canvas(WIDTH, HEIGHT)
 
 while running:
     clear_canvas()
 
     rail = Rail()
-    rail.draw()
 
     # draw title sonic
     title_sonic = load_image('../resource/title_sonic(1).png')
-    # title
-    # width : 260, height : 155
-    title_sonic.clip_draw(225, 80, 260, 155, WIDTH // 2, HEIGHT // 3 * 2, WIDTH // 2, HEIGHT // 2)
 
     # sonic
     # animation : 5
-    # size = 100
-    title_sonic.clip_draw(470, 260, 95, 130, WIDTH // 2, HEIGHT // 4 * 3)
+    # size = 95, 130
+    padding = 0
+    x = 95
+    y = 130
+    for i in range(5):
+        rail.draw()
+
+        # title
+        # width : 260, height : 155
+        title_sonic.clip_draw(225, 80, 260, 155, WIDTH // 2, HEIGHT // 3 * 2, WIDTH // 2, HEIGHT // 2)
+
+        if i == 2:
+            padding = -15
+            x = 110
+            pass
+        # index 2~ : start : 675, x = 110
+        title_sonic.clip_draw(470 + (i * x) + padding, 260, x, y, WIDTH // 2, HEIGHT // 4 * 3)
+
+        update_canvas()
+        delay(0.1)
+
+
 
     handle_events()
-    update_canvas()
     delay(0.01)
 
 close_canvas()
