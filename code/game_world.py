@@ -1,5 +1,8 @@
 objects = [[] for _ in range(4)]
 
+WIDTH = 900
+HEIGHT = 800
+
 def add_object(o, depth = 0):
     objects[depth].append(o)
 
