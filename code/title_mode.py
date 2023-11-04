@@ -94,5 +94,7 @@ def handle_events():
             # exit를 누르면 종료
             if isConflict([location[3][0], location[3][1] - 50], [200, 100], [event.x, HEIGHT - event.y]):
                 game_framework.quit()
-            # print(event.x, HEIGHT - event.y)
+            elif isConflict([location[3][0], location[3][1] + 50], [300, 100], [event.x, HEIGHT - event.y]):
+                game_framework.change_mode(play_mode)
+                # print(event.x, HEIGHT - event.y)
     pass
