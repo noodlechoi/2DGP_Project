@@ -4,7 +4,7 @@ from sdl2 import SDL_QUIT, SDL_KEYDOWN, SDLK_ESCAPE, SDL_MOUSEBUTTONDOWN, SDL_BU
 import game_framework
 import play_mode
 from rail import Rail
-from game_world import WIDTH, HEIGHT
+from game_world import WIDTH, HEIGHT, isConflict
 
 PIXEL_PER_METER = (10.0 / 0.3)
 MOVE_SPEED_KMPH = 20.0
@@ -49,7 +49,7 @@ def finish():
     global sonic_img, rail
     del sonic_img
     del rail
-    del location
+    # del location
 
 def update():
     pass
@@ -91,5 +91,8 @@ def handle_events():
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             game_framework.quit()
         elif event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT:
-            print(event.x, HEIGHT - event.y)
+            # exit를 누르면 종료
+            if isConflict([location[3][0], location[3][1] - 50], [200, 100], [event.x, HEIGHT - event.y]):
+                game_framework.quit()
+            # print(event.x, HEIGHT - event.y)
     pass
