@@ -69,7 +69,7 @@ class StateMachine:
 
 class Pin():
     img = None
-    def __init__(self, x = 450, y = 480):
+    def __init__(self, x = 450, y = 500):
         self.x = x
         self.y = y
         self.frame = 0
