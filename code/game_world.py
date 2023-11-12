@@ -92,16 +92,16 @@ def isConflict(rec_location, size_list, point):
 
 # 두 점 사이에 따라 음수나 양수 반환 함수 : 움직여야하는 좌표 p1 (기준)
 def directtion(p1, p2):
-    if (p1[0] - p2[0]) == 0:
-        if (p1[1] - p2[1]) == 0:
-            return [0, 0]
-        else:
-            return [0, (p1[1] - p2[1]) // abs(p1[1] - p2[1])]
-    elif (p1[1] - p2[1]) == 0:
-        if  (p1[0] - p2[0]) == 0:
-            return [0, 0]
-        else:
-            return [(p1[0] - p2[0]) // abs(p1[0] - p2[0]), 0]
+    # if (p1[0] - p2[0]) == 0:
+    #     if (p1[1] - p2[1]) == 0:
+    #         return [0, 0]
+    #     else:
+    #         return [0, (p1[1] - p2[1]) // abs(p1[1] - p2[1])]
+    # elif (p1[1] - p2[1]) == 0:
+    #     if  (p1[0] - p2[0]) == 0:
+    #         return [0, 0]
+    #     else:
+    #         return [(p1[0] - p2[0]) // abs(p1[0] - p2[0]), 0]
 
 
-    return [(p1[0] - p2[0]) // abs(p1[0] - p2[0]), (p1[1] - p2[1]) // abs(p1[1] - p2[1])]
+    return [(p1[0] - p2[0]) , (p1[1] - p2[1])]

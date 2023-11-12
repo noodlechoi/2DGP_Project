@@ -5,7 +5,7 @@ import game_world
 from arrow import Arrow
 
 PIXEL_PER_METER = (10.0 / 0.3)
-Run_SPEED_KMPH = 20.0
+Run_SPEED_KMPH = 1.0
 Run_SPEED_MPM = Run_SPEED_KMPH * 1000.0 / 60.0
 Run_SPEED_MPS = Run_SPEED_MPM / 60.0
 Run_SPEED_PPS = Run_SPEED_MPS * PIXEL_PER_METER
@@ -27,6 +27,10 @@ def mouse_left_up(e, ball):
 
 def mouse_motion(e, ball):
     return e[0] == 'INPUT' and e[1].type == SDL_MOUSEMOTION
+
+
+def a_down(e, ball):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_a
 
 def time_out(e, ball):
     return e[0] == 'TIME_OUT'
@@ -81,10 +85,12 @@ class Thrown:
 
     @staticmethod
     def do(ball):
-        ball.x += ball.dir[0] * Run_SPEED_PPS * game_framework.frame_time
+        ball.x += (-1) * ball.dir[0] * Run_SPEED_PPS * game_framework.frame_time
         ball.y += (-1) * ball.dir[1] * Run_SPEED_PPS * game_framework.frame_time
 
         ball.frame = (ball.frame + FRAMES_PER_ACTION * 4 * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
+
+
 
     @staticmethod
     def draw(ball):
@@ -223,7 +229,7 @@ class StateMachine:
         self.sonic = sonic
         self.cur_state = Standing
         self.transitions = {
-            Standing : {mouse_left_down: Run},
+            Standing : {mouse_left_down: Run, a_down: Standing},
             Run : {time_out: Rolling, mouse_left_up : Thrown},
             Rolling : {mouse_left_up : Thrown},
             Thrown : {}
@@ -269,9 +275,17 @@ class Sonic():
 
     def draw(self):
         self.state_machine.draw()
+        draw_rectangle(*self.get_bb())
 
     def update(self):
         self.state_machine.update()
 
     def handle_event(self, event):
         self.state_machine.handle_event(('INPUT', event))
+
+    def get_bb(self):
+        return self.x - self.size[0] // 2, self.y - self.size[1] // 2, self.x + self.size[0] // 2, self.y + self.size[1] // 2
+
+    def handle_collision(self, group, other):
+        if group == 'ball:pin':
+            pass

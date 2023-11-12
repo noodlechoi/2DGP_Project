@@ -17,12 +17,24 @@ def init():
     player_rail = Rail()
     game_world.add_object(player_rail, 0)
 
-    pins = Pin()
-    game_world.add_object(pins, 1)
+    first_pin = [450, 440]
+    pin_list = [
+        [first_pin[0] - 30 * 3, first_pin[1] + 25 * 3], [first_pin[0] - 30 , first_pin[1] + 25 * 3], [first_pin[0] + 30 , first_pin[1] + 25 * 3], [first_pin[0] + 30 * 3, first_pin[1] + 25 * 3],
+        [first_pin[0] - 30 * 2, first_pin[1] + 25 * 2], [first_pin[0], first_pin[1] + 25 * 2], [first_pin[0] + 30 * 2, first_pin[1] + 25 * 2],
+        [first_pin[0] - 30 , first_pin[1] + 25], [first_pin[0] + 30, first_pin[1] + 25],
+        [first_pin[0], first_pin[1]]
+    ]
+    pins = [Pin(pin_list[i][0], pin_list[i][1]) for i in range(10)]
+
+    game_world.add_objects(pins, 1)
+
 
     player = Sonic()
     game_world.add_object(player, 2)
 
+    game_world.add_collision_pair('ball:pin', player, None)
+    for pin in pins:
+        game_world.add_collision_pair('ball:pin', None, pin)
 
     pass
 
