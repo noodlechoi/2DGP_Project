@@ -1,12 +1,11 @@
 from pico2d import *
 
 import game_framework
-from game_world import isConflict
-from game_world import HEIGHT
-
+import game_world
+from arrow import Arrow
 
 PIXEL_PER_METER = (10.0 / 0.3)
-Run_SPEED_KMPH = 1.0
+Run_SPEED_KMPH = 20.0
 Run_SPEED_MPM = Run_SPEED_KMPH * 1000.0 / 60.0
 Run_SPEED_MPS = Run_SPEED_MPM / 60.0
 Run_SPEED_PPS = Run_SPEED_MPS * PIXEL_PER_METER
@@ -21,16 +20,51 @@ run_location = [[185, 1525], [398, 1525]]
 run_size = [[50, 40], [41, 40]]
 
 def mouse_left_down(e, ball):
-    return e[0] == 'INPUT' and e[1].type == SDL_MOUSEBUTTONDOWN and e[1].button == SDL_BUTTON_LEFT and  isConflict([ball.x, ball.y], ball.size, [e[1].x, HEIGHT - e[1].y])
+    return e[0] == 'INPUT' and e[1].type == SDL_MOUSEBUTTONDOWN and e[1].button == SDL_BUTTON_LEFT and  game_world.isConflict([ball.x, ball.y], ball.size, [e[1].x, game_world.HEIGHT - e[1].y])
 
 def mouse_left_up(e, ball):
-    return e[0] == 'INPUT' and e[1].type == SDL_MOUSEBUTTONUP and e[1].button == SDL_BUTTON_LEFT and  isConflict([ball.x, ball.y], ball.size, [e[1].x, HEIGHT - e[1].y])
+    return e[0] == 'INPUT' and e[1].type == SDL_MOUSEBUTTONUP and e[1].button == SDL_BUTTON_LEFT and  game_world.isConflict([ball.x, ball.y], ball.size, [e[1].x, game_world.HEIGHT - e[1].y])
 
 def mouse_motion(e, ball):
     return e[0] == 'INPUT' and e[1].type == SDL_MOUSEMOTION
 
 def time_out(e, ball):
     return e[0] == 'TIME_OUT'
+
+
+class Dead:
+    @staticmethod
+    def enter(ball, e):
+        global FRAMES_PER_ACTION
+        FRAMES_PER_ACTION = 5
+        ball.frame = 0
+        ball.real_size = [40, 35]
+        ball.location = [605, 500]
+        pass
+
+    @staticmethod
+    def exit(ball, e):
+        pass
+
+    @staticmethod
+    def do(ball):
+        # ball.x += ball.dir[0] * Run_SPEED_PPS * game_framework.frame_time
+        # ball.y += (-1) * ball.dir[1] * Run_SPEED_PPS * game_framework.frame_time
+        # ball.frame = (ball.frame + FRAMES_PER_ACTION * 4 * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
+        ball.frame = 0
+
+    @staticmethod
+    def draw(ball):
+        if ball.dir[0] <= 0:
+            Sonic.img.clip_draw(ball.location[0] + ball.real_size[0] * int(ball.frame), ball.location[1],
+                                ball.real_size[0], ball.real_size[1], ball.x, ball.y,
+                                ball.size[0], ball.size[1])
+        else:
+            Sonic.img.clip_composite_draw(ball.location[0] + ball.real_size[0] * int(ball.frame), ball.location[1],
+                                          ball.real_size[0], ball.real_size[1], 0, 'h', ball.x, ball.y,
+                                          ball.size[0], ball.size[1])
+
+
 class Thrown:
     @staticmethod
     def enter(ball, e):
@@ -47,25 +81,43 @@ class Thrown:
 
     @staticmethod
     def do(ball):
+        ball.x += ball.dir[0] * Run_SPEED_PPS * game_framework.frame_time
+        ball.y += (-1) * ball.dir[1] * Run_SPEED_PPS * game_framework.frame_time
+
         ball.frame = (ball.frame + FRAMES_PER_ACTION * 4 * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
 
     @staticmethod
     def draw(ball):
-        Sonic.img.clip_draw(ball.location[0] + ball.real_size[0] * int(ball.frame), ball.location[1], ball.real_size[0], ball.real_size[1], ball.x, ball.y,
-                            ball.size[0], ball.size[1])
+        if ball.dir[0] <= 0:
+            Sonic.img.clip_draw(ball.location[0] + ball.real_size[0] * int(ball.frame), ball.location[1],
+                                ball.real_size[0], ball.real_size[1], ball.x, ball.y,
+                                ball.size[0], ball.size[1])
+        else:
+            Sonic.img.clip_composite_draw(ball.location[0] + ball.real_size[0] * int(ball.frame), ball.location[1],
+                                          ball.real_size[0], ball.real_size[1], 0, 'h', ball.x, ball.y,
+                                          ball.size[0], ball.size[1])
 
 class Rolling:
     @staticmethod
     def enter(ball, e):
         global FRAMES_PER_ACTION
+        global arrow
         FRAMES_PER_ACTION = 5
         ball.frame = 0
         ball.real_size = [40, 35]
         ball.location = [605, 1210]
+
+        arrow = Arrow()
+        game_world.add_object(arrow, 1)
         pass
 
     @staticmethod
     def exit(ball, e):
+        global arrow
+
+        # 나갈 때 방향 결정
+        ball.dir = game_world.directtion([ball.x, ball.y], [arrow.x, arrow.y])
+        game_world.remove_object(arrow)
         pass
 
     @staticmethod
@@ -74,8 +126,14 @@ class Rolling:
 
     @staticmethod
     def draw(ball):
-        Sonic.img.clip_draw(ball.location[0] + ball.real_size[0] * int(ball.frame), ball.location[1], ball.real_size[0], ball.real_size[1], ball.x, ball.y,
-                            ball.size[0], ball.size[1])
+        if ball.dir[0] <= 0:
+            Sonic.img.clip_draw(ball.location[0] + ball.real_size[0] * int(ball.frame), ball.location[1],
+                                ball.real_size[0], ball.real_size[1], ball.x, ball.y,
+                                ball.size[0], ball.size[1])
+        else:
+            Sonic.img.clip_composite_draw(ball.location[0] + ball.real_size[0] * int(ball.frame), ball.location[1],
+                                          ball.real_size[0], ball.real_size[1], 0, 'h', ball.x, ball.y,
+                                          ball.size[0], ball.size[1])
 
 
 class Run:
@@ -83,16 +141,23 @@ class Run:
     def enter(ball, e):
         global FRAMES_PER_ACTION
         global frame_idx
+        global arrow
         frame_idx = 0
         ball.frame = 0
         ball.real_size = [43, 40]
         ball.location = [10, 1525]
         FRAMES_PER_ACTION = 4
         ball.wait_time = get_time()
+
+        arrow = Arrow()
+        game_world.add_object(arrow, 1)
         pass
 
     @staticmethod
     def exit(ball, e):
+        global arrow
+        ball.dir = game_world.directtion([ball.x, ball.y], [arrow.x, arrow.y])
+        game_world.remove_object(arrow)
         pass
 
     @staticmethod
@@ -114,8 +179,14 @@ class Run:
 
     @staticmethod
     def draw(ball):
-        Sonic.img.clip_draw(ball.location[0] + ball.real_size[0] * int(ball.frame), ball.location[1], ball.real_size[0], ball.real_size[1], ball.x, ball.y,
-                            ball.size[0], ball.size[1])
+        if ball.dir[0] <= 0:
+            Sonic.img.clip_draw(ball.location[0] + ball.real_size[0] * int(ball.frame), ball.location[1],
+                                ball.real_size[0], ball.real_size[1], ball.x, ball.y,
+                                ball.size[0], ball.size[1])
+        else:
+            Sonic.img.clip_composite_draw(ball.location[0] + ball.real_size[0] * int(ball.frame), ball.location[1],
+                                          ball.real_size[0], ball.real_size[1], 0, 'h', ball.x, ball.y,
+                                          ball.size[0], ball.size[1])
 
 
 
@@ -138,8 +209,13 @@ class Standing:
 
     @staticmethod
     def draw(ball):
-        Sonic.img.clip_draw(ball.location[0] + ball.real_size[0] * int(ball.frame), ball.location[1], ball.real_size[0], ball.real_size[1], ball.x, ball.y,
-                            ball.size[0], ball.size[1])
+        if ball.dir[0] <= 0:
+            Sonic.img.clip_draw(ball.location[0] + ball.real_size[0] * int(ball.frame), ball.location[1], ball.real_size[0], ball.real_size[1], ball.x, ball.y,
+                                ball.size[0], ball.size[1])
+        else:
+            Sonic.img.clip_composite_draw(ball.location[0] + ball.real_size[0] * int(ball.frame), ball.location[1],
+                                            ball.real_size[0], ball.real_size[1], 0, 'h', ball.x, ball.y,
+                                            ball.size[0], ball.size[1])
 
 
 class StateMachine:
@@ -160,6 +236,9 @@ class StateMachine:
         self.cur_state.do(self.sonic)
 
     def handle_event(self, e):
+        if e[0] == 'INPUT' and e[1].type == SDL_MOUSEMOTION and self.cur_state != Thrown:
+            self.sonic.dir = game_world.directtion([self.sonic.x, self.sonic.y ], [e[1].x, game_world.HEIGHT - e[1].y])
+
         for check_event, next_state in self.transitions[self.cur_state].items():
             if check_event(e, self.sonic):
                 self.cur_state.exit(self.sonic, e)
@@ -181,7 +260,7 @@ class Sonic():
         self.location = [42, 1625]
         self.real_size = [30, 45]
         self.size = [100, 150]
-        self.dir = 0
+        self.dir = [0, 0]
         self.frame = 0
         self.state_machine = StateMachine(self)
         self.state_machine.start()

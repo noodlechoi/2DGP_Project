@@ -1,5 +1,5 @@
 from pico2d import clear_canvas, update_canvas, get_events
-from sdl2 import SDL_QUIT, SDL_KEYDOWN, SDLK_ESCAPE, SDL_MOUSEBUTTONDOWN, SDL_BUTTON_LEFT
+from sdl2 import SDL_QUIT, SDL_KEYDOWN, SDLK_ESCAPE, SDL_MOUSEBUTTONDOWN, SDL_BUTTON_LEFT, SDL_MOUSEMOTION
 
 import game_framework
 import game_world
@@ -7,7 +7,6 @@ from rail import Rail
 from pin import Pin
 from sonic import Sonic
 import title_mode
-from arrow import Arrow
 
 def init():
     global rail
@@ -24,8 +23,6 @@ def init():
     player = Sonic()
     game_world.add_object(player, 2)
 
-    arrow = Arrow()
-    game_world.add_object(arrow, 1)
 
     pass
 
