@@ -87,6 +87,10 @@ class Thrown:
     def do(ball):
         ball.x += (-1) * ball.dir[0] * Run_SPEED_PPS * game_framework.frame_time
         ball.y += (-1) * ball.dir[1] * Run_SPEED_PPS * game_framework.frame_time
+        if ball.x <= 0 - ball.size[0] // 2 or ball.x >= game_world.WIDTH + ball.size[0] // 2 or ball.y <= 0 - ball.size[1] // 2 or ball.y >= game_world.HEIGHT + ball.size[1] // 2:
+            ball.state_machine.cur_state = Standing
+            ball.state_machine.start()
+            return
 
         ball.frame = (ball.frame + FRAMES_PER_ACTION * 4 * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
 
@@ -202,6 +206,10 @@ class Standing:
         global FRAMES_PER_ACTION
         ball.frame = 0
         FRAMES_PER_ACTION = 6
+        ball.x = 450
+        ball.y = 100
+        ball.location = [42, 1625]
+        ball.real_size = [30, 45]
         pass
 
     @staticmethod
