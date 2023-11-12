@@ -49,11 +49,10 @@ def run(start_mode):
     frame_time = 0.0
     # time msec 단위로 나옴
     current_time = time.time()
-    # fill here
     while running:
         stack[-1].handle_events()
-        stack[-1].draw()
         stack[-1].update()
+        stack[-1].draw()
 
         frame_time = time.time() - current_time
         frame_rate = 1.0 / frame_time
