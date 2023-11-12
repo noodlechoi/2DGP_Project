@@ -58,16 +58,7 @@ def draw():
     global x, y, padding, frame
     clear_canvas()
 
-    # sonic
-    # animation : 5
-    # size = 95, 130
-    # 프레임 크기 업데이트
-    if frame >= 2.0:
-        padding = -15
-        x = 110
-    else:
-        padding = 0
-        x = 95
+
 
     rail.draw()
     # title
@@ -78,6 +69,16 @@ def draw():
     # index 2~ : start : 675, x = 110
     # 프레임 = 한 액션 당 프레임 수 * 시간 당 액션 수 * 프레임 시간
     frame = (frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
+    # sonic
+    # animation : 5
+    # size = 95, 130
+    # 프레임 크기 업데이트
+    if int(frame) >= 2:
+        padding = -15
+        x = 110
+    else:
+        padding = 0
+        x = 95
     sonic_img.clip_draw(location[1][0] + (int(frame) * x) + padding, location[1][1], x, y, WIDTH // 2, HEIGHT // 4 * 3)
 
     text_img.draw(location[3][0], location[3][1], 300, 200)
