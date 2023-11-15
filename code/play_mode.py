@@ -17,7 +17,7 @@ def init():
     player_rail = Rail()
     game_world.add_object(player_rail, 0)
 
-    first_pin = [450, 440]
+    first_pin = [450, 480]
     pin_list = [
         [first_pin[0] - 30 * 3, first_pin[1] + 25 * 3], [first_pin[0] - 30 , first_pin[1] + 25 * 3], [first_pin[0] + 30 , first_pin[1] + 25 * 3], [first_pin[0] + 30 * 3, first_pin[1] + 25 * 3],
         [first_pin[0] - 30 * 2, first_pin[1] + 25 * 2], [first_pin[0], first_pin[1] + 25 * 2], [first_pin[0] + 30 * 2, first_pin[1] + 25 * 2],
@@ -35,6 +35,7 @@ def init():
     game_world.add_collision_pair('ball:pin', player, None)
     for pin in pins:
         game_world.add_collision_pair('ball:pin', None, pin)
+        # game_world.add_collision_pair('ball:pin', pin, None)
 
     pass
 
@@ -45,6 +46,8 @@ def finish():
 
 
 def update():
+    # pin이 다 쓰러지면 다시 생기기
+
     game_world.update()
     game_world.handle_collisions()
     pass

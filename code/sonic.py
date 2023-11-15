@@ -23,7 +23,7 @@ def mouse_left_down(e, ball):
     return e[0] == 'INPUT' and e[1].type == SDL_MOUSEBUTTONDOWN and e[1].button == SDL_BUTTON_LEFT and  game_world.isConflict([ball.x, ball.y], ball.size, [e[1].x, game_world.HEIGHT - e[1].y])
 
 def mouse_left_up(e, ball):
-    return e[0] == 'INPUT' and e[1].type == SDL_MOUSEBUTTONUP and e[1].button == SDL_BUTTON_LEFT and  game_world.isConflict([ball.x, ball.y], ball.size, [e[1].x, game_world.HEIGHT - e[1].y])
+    return e[0] == 'INPUT' and e[1].type == SDL_MOUSEBUTTONUP and e[1].button == SDL_BUTTON_LEFT
 
 def mouse_motion(e, ball):
     return e[0] == 'INPUT' and e[1].type == SDL_MOUSEMOTION

@@ -33,7 +33,6 @@ class Dead:
             pin.frame = 3
         else:
             pin.frame = 5
-
         pass
 
     @staticmethod
@@ -138,4 +137,11 @@ class Pin():
             self.state_machine.cur_state = Dead
             self.state_machine.start()
             game_world.remove_collision_object(self)
+            # game_world.add_collision_pair('pin:pin', None, self)
             pass
+        if group == 'pin:pin':
+            # 쓰러지는 핀이 서있는 핀을 쓰러뜨리도록
+            if self.state_machine.cur_state == Dead and other.state_machine.cur_state == Standing:
+                other.state_machine.cur_state = Dead
+                other.state_machine.start()
+
