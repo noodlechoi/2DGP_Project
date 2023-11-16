@@ -13,6 +13,7 @@ def init():
     global pins
     global player
     global arrow
+    global pin_list
 
     player_rail = Rail()
     game_world.add_object(player_rail, 0)
@@ -44,9 +45,25 @@ def finish():
     game_world.clear()
     pass
 
+def reproduce_pins():
+    global pins
+    global pin_list
+    # pin이 다 쓰러지면 다시 생기기
+    is_exist_pin = False
+    for ol in game_world.objects:
+        for o in ol:
+            if type(Pin()) == type(o):
+                is_exist_pin = True
+
+    if not is_exist_pin:
+        print('?')
+        pins = [Pin(pin_list[i][0], pin_list[i][1]) for i in range(10)]
+        game_world.add_objects(pins, 1)
+        for pin in pins:
+            game_world.add_collision_pair('ball:pin', None, pin)
 
 def update():
-    # pin이 다 쓰러지면 다시 생기기
+    reproduce_pins()
 
     game_world.update()
     game_world.handle_collisions()
