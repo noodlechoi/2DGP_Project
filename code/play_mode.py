@@ -87,6 +87,8 @@ def handle_events():
             game_framework.change_mode(title_mode)
         else:
             player.handle_event(event)
+            if(event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT):
+                print(event.x, game_world.HEIGHT - event.y)
 
     pass
 

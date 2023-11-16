@@ -4,7 +4,7 @@ from sdl2 import SDL_QUIT, SDL_KEYDOWN, SDLK_ESCAPE, SDL_MOUSEBUTTONDOWN, SDL_BU
 import game_framework
 import play_mode
 from rail import Rail
-from game_world import WIDTH, HEIGHT, isConflict
+from game_world import WIDTH, HEIGHT, is_conflict
 
 PIXEL_PER_METER = (10.0 / 0.3)
 MOVE_SPEED_KMPH = 20.0
@@ -93,9 +93,9 @@ def handle_events():
             game_framework.quit()
         elif event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT:
             # exit를 누르면 종료
-            if isConflict([location[3][0], location[3][1] - 50], [200, 100], [event.x, HEIGHT - event.y]):
+            if is_conflict([location[3][0], location[3][1] - 50], [200, 100], [event.x, HEIGHT - event.y]):
                 game_framework.quit()
-            elif isConflict([location[3][0], location[3][1] + 50], [300, 100], [event.x, HEIGHT - event.y]):
+            elif is_conflict([location[3][0], location[3][1] + 50], [300, 100], [event.x, HEIGHT - event.y]):
                 game_framework.change_mode(play_mode)
                 # print(event.x, HEIGHT - event.y)
     pass

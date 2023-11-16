@@ -37,15 +37,15 @@ class Dead:
 
     @staticmethod
     def exit(pin):
+        # 충돌 오브젝트에서는 Standing에서 제거
+        game_world.remove_object(pin)
         pass
 
     @staticmethod
     def do(pin):
         pin.frame = (pin.frame + (-1) * (pin.dir) * ( FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time))
-        if pin.frame >= pin_frame_size:
-            game_world.remove_object(pin)
-        elif pin.frame < 0:
-            game_world.remove_object(pin)
+        if pin.frame >= pin_frame_size or pin.frame < 0:
+            pin.state_machine.cur_state.exit(pin)
         pass
 
     @staticmethod
@@ -66,6 +66,10 @@ class Standing:
 
     @staticmethod
     def exit(pin):
+        pin.state_machine.cur_state = Dead
+        pin.state_machine.start()
+        # 한번 부딪힌 핀은 소닉과 더 안 부딪힘
+        game_world.remove_collision_object(pin)
         pass
 
     @staticmethod
@@ -134,9 +138,8 @@ class Pin():
             else:
                 self.dir = 1
 
-            self.state_machine.cur_state = Dead
-            self.state_machine.start()
-            game_world.remove_collision_object(self)
+            # Standing exit
+            self.state_machine.cur_state.exit(self)
             # game_world.add_collision_pair('pin:pin', None, self)
             pass
         if group == 'pin:pin':

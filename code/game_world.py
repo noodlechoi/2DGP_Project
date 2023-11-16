@@ -80,7 +80,7 @@ def handle_collisions():
                     b.handle_collision(group, a)
 
 # list 받아서 사각형과 점의 충돌을 체크하는 함수
-def isConflict(rec_location, size_list, point):
+def is_conflict(rec_location, size_list, point):
     min = [rec_location[0] - size_list[0] // 2, rec_location[1] - size_list[1] // 2]
     max = [rec_location[0] + size_list[0] // 2, rec_location[1] + size_list[1] // 2]
 

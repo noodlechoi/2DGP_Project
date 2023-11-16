@@ -3,6 +3,7 @@ from pico2d import *
 import game_framework
 import game_world
 from arrow import Arrow
+import math
 
 PIXEL_PER_METER = (10.0 / 0.3)
 Run_SPEED_KMPH = 1.0
@@ -20,7 +21,7 @@ run_location = [[185, 1525], [398, 1525]]
 run_size = [[50, 40], [41, 40]]
 
 def mouse_left_down(e, ball):
-    return e[0] == 'INPUT' and e[1].type == SDL_MOUSEBUTTONDOWN and e[1].button == SDL_BUTTON_LEFT and  game_world.isConflict([ball.x, ball.y], ball.size, [e[1].x, game_world.HEIGHT - e[1].y])
+    return e[0] == 'INPUT' and e[1].type == SDL_MOUSEBUTTONDOWN and e[1].button == SDL_BUTTON_LEFT and  game_world.is_conflict([ball.x, ball.y], ball.size, [e[1].x, game_world.HEIGHT - e[1].y])
 
 def mouse_left_up(e, ball):
     return e[0] == 'INPUT' and e[1].type == SDL_MOUSEBUTTONUP and e[1].button == SDL_BUTTON_LEFT
@@ -73,6 +74,8 @@ class Thrown:
     @staticmethod
     def enter(ball, e):
         global FRAMES_PER_ACTION
+        global time
+        time = 0
         FRAMES_PER_ACTION = 5
         ball.frame = 0
         ball.real_size = [40, 35]
@@ -81,15 +84,22 @@ class Thrown:
 
     @staticmethod
     def exit(ball, e):
+        ball.state_machine.cur_state = Standing
+        ball.state_machine.start()
         pass
 
     @staticmethod
     def do(ball):
-        ball.x += (-1) * ball.dir[0] * Run_SPEED_PPS * game_framework.frame_time
+        global time
+        # 시간이 지나면 회전하도록
+        curve = -3 * math.sin(math.radians(time))
+        time += 1
+
+        ball.x += (-1) * ball.dir[0] * Run_SPEED_PPS * game_framework.frame_time + curve
         ball.y += (-1) * ball.dir[1] * Run_SPEED_PPS * game_framework.frame_time
+
         if ball.x <= 0 - ball.size[0] // 2 or ball.x >= game_world.WIDTH + ball.size[0] // 2 or ball.y <= 0 - ball.size[1] // 2 or ball.y >= game_world.HEIGHT + ball.size[1] // 2:
-            ball.state_machine.cur_state = Standing
-            ball.state_machine.start()
+            ball.state_machine.cur_state.exit(ball, [])
             return
 
         ball.frame = (ball.frame + FRAMES_PER_ACTION * 4 * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
@@ -125,7 +135,7 @@ class Rolling:
     def exit(ball, e):
         global arrow
 
-        # 나갈 때 방향 결정
+        # 나갈 때 방향 결정, dir = 볼과 화살표 거리 및 방향
         ball.dir = game_world.directtion([ball.x, ball.y], [arrow.x, arrow.y])
         game_world.remove_object(arrow)
         pass
@@ -166,6 +176,8 @@ class Run:
     @staticmethod
     def exit(ball, e):
         global arrow
+
+        # Run 상태에서 Thrown 상태가 될 수 있기 때문에
         ball.dir = game_world.directtion([ball.x, ball.y], [arrow.x, arrow.y])
         game_world.remove_object(arrow)
         pass
