@@ -105,3 +105,9 @@ def directtion(p1, p2):
 
 
     return [(p1[0] - p2[0]) , (p1[1] - p2[1])]
+
+def get_dots(p1, p2, t):
+    return [get_dot_on_line(p1[0], p2[0], t), get_dot_on_line(p1[1], p2[1], t)]
+
+def get_dot_on_line(s, e, t):
+    return (1 - t) * s + t * e

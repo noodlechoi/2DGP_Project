@@ -4,6 +4,7 @@ import game_framework
 import game_world
 from arrow import Arrow
 import math
+import play_mode
 
 PIXEL_PER_METER = (10.0 / 0.3)
 Run_SPEED_KMPH = 1.0
@@ -92,18 +93,21 @@ class Thrown:
     def do(ball):
         global time
         # 시간이 지나면 회전하도록
-        curve = -3 * math.sin(math.radians(time))
-        time += 1
+        curve = -100 * math.sin(math.radians(time))
+
+        time += game_framework.frame_time
 
         ball.x += (-1) * ball.dir[0] * Run_SPEED_PPS * game_framework.frame_time + curve
         ball.y += (-1) * ball.dir[1] * Run_SPEED_PPS * game_framework.frame_time
+
+        # test
+        play_mode.player_rail.dead_line(ball)
 
         if ball.x <= 0 - ball.size[0] // 2 or ball.x >= game_world.WIDTH + ball.size[0] // 2 or ball.y <= 0 - ball.size[1] // 2 or ball.y >= game_world.HEIGHT + ball.size[1] // 2:
             ball.state_machine.cur_state.exit(ball, [])
             return
 
         ball.frame = (ball.frame + FRAMES_PER_ACTION * 4 * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
-
 
 
     @staticmethod
@@ -222,6 +226,7 @@ class Standing:
         ball.y = 100
         ball.location = [42, 1625]
         ball.real_size = [30, 45]
+        ball.size = [100, 150]
         pass
 
     @staticmethod

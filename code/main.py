@@ -8,5 +8,4 @@ game_framework.run(start_mode)
 close_canvas()
 
 # pin 끼리의 충돌 구현
-# pin 사라지면 다시 생성
 # 소닉이 굴러갈 때 소닉 확대

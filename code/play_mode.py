@@ -9,7 +9,7 @@ from sonic import Sonic
 import title_mode
 
 def init():
-    global rail
+    global player_rail
     global pins
     global player
     global arrow
@@ -56,7 +56,6 @@ def reproduce_pins():
                 is_exist_pin = True
 
     if not is_exist_pin:
-        print('?')
         pins = [Pin(pin_list[i][0], pin_list[i][1]) for i in range(10)]
         game_world.add_objects(pins, 1)
         for pin in pins:
