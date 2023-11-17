@@ -93,15 +93,21 @@ class Thrown:
     def do(ball):
         global time
         # 시간이 지나면 회전하도록
-        curve = -100 * math.sin(math.radians(time))
+        curve = -110 * math.sin(math.radians(time))
+        # curve가 -3이 넘으면 다시 아래로 내려가는 것을 방지
+        if curve <= -3: curve = -2
 
         time += game_framework.frame_time
 
         ball.x += (-1) * ball.dir[0] * Run_SPEED_PPS * game_framework.frame_time + curve
-        ball.y += (-1) * ball.dir[1] * Run_SPEED_PPS * game_framework.frame_time
+        ball.y += (-1) * ball.dir[1] * Run_SPEED_PPS * game_framework.frame_time + curve
+
+        # 크기가 원근감 있게 줄어듦
+        ball.size[0] -= int(14 * Run_SPEED_PPS * game_framework.frame_time)
+        ball.size[1] -= int(14 * Run_SPEED_PPS * game_framework.frame_time)
 
         # test
-        play_mode.player_rail.dead_line(ball)
+        # play_mode.player_rail.dead_line(ball)
 
         if ball.x <= 0 - ball.size[0] // 2 or ball.x >= game_world.WIDTH + ball.size[0] // 2 or ball.y <= 0 - ball.size[1] // 2 or ball.y >= game_world.HEIGHT + ball.size[1] // 2:
             ball.state_machine.cur_state.exit(ball, [])
