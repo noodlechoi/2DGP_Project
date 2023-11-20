@@ -9,8 +9,15 @@ pin_frame = [
     [15, 48],
     # 오른쪽으로
     [23, 48], [38, 48], [40, 48],[48, 48],
-    ]
-pin_frame_size = 9
+]
+pin_size = [
+    # 왼쪽으로
+    [100, 50], [80, 70], [80, 70], [60, 90],
+    # 중간
+    [50, 100],
+    # 오른쪽으로
+    [60, 90], [80, 70], [80, 70],[100, 50],
+]
 
 PIXEL_PER_METER = (10.0 / 0.3)
 Fall_SPEED_KMPH = 0.05
@@ -44,7 +51,7 @@ class Dead:
     @staticmethod
     def do(pin):
         pin.frame = (pin.frame + (-1) * (pin.dir) * ( FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time))
-        if pin.frame >= pin_frame_size or pin.frame < 0:
+        if pin.frame >= len(pin_frame) or pin.frame < 0:
             pin.state_machine.cur_state.exit(pin)
         pass
 
@@ -52,6 +59,7 @@ class Dead:
     def draw(pin):
         # 프레임에 따라 사이즈 변경
         pin.real_size = pin_frame[int(pin.frame)]
+        pin.size = pin_size[int(pin.frame)]
         location = 0
         for i in range(0, int(pin.frame)):
                 location += pin_frame[i][0]
@@ -68,6 +76,7 @@ class Standing:
     def exit(pin):
         pin.state_machine.cur_state = Dead
         pin.state_machine.start()
+
         # 한번 부딪힌 핀은 소닉과 더 안 부딪힘
         game_world.remove_collision_object(pin)
         pass
@@ -140,11 +149,18 @@ class Pin():
 
             # Standing exit
             self.state_machine.cur_state.exit(self)
-            # game_world.add_collision_pair('pin:pin', None, self)
+
+            game_world.add_collision_pair('pin:pin', self, None)
             pass
         if group == 'pin:pin':
             # 쓰러지는 핀이 서있는 핀을 쓰러뜨리도록
             if self.state_machine.cur_state == Dead and other.state_machine.cur_state == Standing:
+                if game_world.directtion([self.x, self.y], [other.x, other.y])[0] < 0:
+                    self.dir = -1
+                else:
+                    self.dir = 1
+
                 other.state_machine.cur_state = Dead
                 other.state_machine.start()
+
 

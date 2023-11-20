@@ -72,7 +72,7 @@ def collide(a, b):
     return True
 
 def handle_collisions():
-    for group, pairs in collision_pairs.items():
+    for group, pairs in collision_pairs.copy().items():
         for a in pairs[0]:
             for b in pairs[1]:
                 if collide(a, b):

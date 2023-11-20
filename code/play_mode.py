@@ -36,7 +36,7 @@ def init():
     game_world.add_collision_pair('ball:pin', player, None)
     for pin in pins:
         game_world.add_collision_pair('ball:pin', None, pin)
-        # game_world.add_collision_pair('ball:pin', pin, None)
+        game_world.add_collision_pair('pin:pin', None, pin)
 
     pass
 
@@ -60,6 +60,7 @@ def reproduce_pins():
         game_world.add_objects(pins, 1)
         for pin in pins:
             game_world.add_collision_pair('ball:pin', None, pin)
+            game_world.add_collision_pair('pin:pin', None, pin)
 
 def update():
     reproduce_pins()
