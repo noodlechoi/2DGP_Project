@@ -72,15 +72,15 @@ class Thrown:
         ball.size[0] -= int(14 * Run_SPEED_PPS * game_framework.frame_time)
         ball.size[1] -= int(14 * Run_SPEED_PPS * game_framework.frame_time)
 
-
-        if play_mode.player_rail.dead_line(ball):
-            ball.state_machine.cur_state.exit(ball, [])
-
-
+        
+        # rail 밖으로 나갔을 때
         if ball.x <= 0 - ball.size[0] // 2 + 10 or ball.x >= game_world.WIDTH + ball.size[0] // 2 or ball.y <= 0 - ball.size[1] // 2 or ball.y >= game_world.HEIGHT + ball.size[1] // 2:
             ball.state_machine.cur_state.exit(ball, [])
             return
-
+        if play_mode.player_rail.dead_line(ball):
+            ball.state_machine.cur_state.exit(ball, [])
+            return
+        
         ball.frame = (ball.frame + FRAMES_PER_ACTION * 4 * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
 
 
