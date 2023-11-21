@@ -106,6 +106,7 @@ def directtion(p1, p2):
 
     return [(p1[0] - p2[0]) , (p1[1] - p2[1])]
 
+# 직선 위 점 구하기
 def get_dots(p1, p2, t):
     return [get_dot_on_line(p1[0], p2[0], t), get_dot_on_line(p1[1], p2[1], t)]
 

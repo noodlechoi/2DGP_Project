@@ -4,11 +4,11 @@ import game_framework
 
 pin_frame = [
     # 왼쪽으로
-    [48, 48], [40, 48], [38, 48], [23, 48],
+    [48, 28], [40, 30], [38, 35], [23, 40],
     # 중간
     [15, 48],
     # 오른쪽으로
-    [23, 48], [38, 48], [40, 48],[48, 48],
+    [23, 40], [38, 35], [40, 30],[48, 28],
 ]
 pin_size = [
     # 왼쪽으로
@@ -149,18 +149,5 @@ class Pin():
 
             # Standing exit
             self.state_machine.cur_state.exit(self)
-
-            game_world.add_collision_pair('pin:pin', self, None)
-            pass
-        if group == 'pin:pin':
-            # 쓰러지는 핀이 서있는 핀을 쓰러뜨리도록
-            if self.state_machine.cur_state == Dead and other.state_machine.cur_state == Standing:
-                if game_world.directtion([self.x, self.y], [other.x, other.y])[0] < 0:
-                    self.dir = -1
-                else:
-                    self.dir = 1
-
-                other.state_machine.cur_state = Dead
-                other.state_machine.start()
 
 

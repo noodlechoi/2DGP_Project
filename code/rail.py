@@ -19,7 +19,7 @@ class Rail():
     img = None
     def __init__(self):
         self.rail_bar = RailBar()
-        self.line = { 'back' : [[340, 540], [550, 540]], 'left' : [[0, 240], [350, 540]], 'right' : [[900, 240], [550, 540]]}
+        self.line = { 'back' : [[340, 530], [550, 530]], 'left' : [[0, 240], [350, 530]], 'right' : [[900, 240], [550, 530]]}
         game_world.add_object(self.rail_bar, 3)
         if Rail.img == None:
             Rail.img = load_image('../resource/bowling_rail.png')
@@ -35,6 +35,16 @@ class Rail():
     def dead_line(self, ball):
         for where, loc in self.line.items():
             t = 0
-            if ball.x <= loc[0][0] and ball.y >= loc[0][1]:
-                print('넘었음')
-        pass
+            while t < 1.0:
+                # 두 점의 점들을 구해서
+                dx, dy = game_world.get_dots(loc[0], loc[1], t)
+                # 그 점을 지나면 true
+                if where == 'left':
+                    if ball.x <= dx and ball.y >= dy:
+                        return True
+                else:
+                    if ball.x >= dx and ball.y >= dy:
+                        return True
+                t += 0.1
+
+        return False

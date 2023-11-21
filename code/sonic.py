@@ -37,40 +37,6 @@ def a_down(e, ball):
 def time_out(e, ball):
     return e[0] == 'TIME_OUT'
 
-
-class Dead:
-    @staticmethod
-    def enter(ball, e):
-        global FRAMES_PER_ACTION
-        FRAMES_PER_ACTION = 5
-        ball.frame = 0
-        ball.real_size = [40, 35]
-        ball.location = [605, 500]
-        pass
-
-    @staticmethod
-    def exit(ball, e):
-        pass
-
-    @staticmethod
-    def do(ball):
-        # ball.x += ball.dir[0] * Run_SPEED_PPS * game_framework.frame_time
-        # ball.y += (-1) * ball.dir[1] * Run_SPEED_PPS * game_framework.frame_time
-        # ball.frame = (ball.frame + FRAMES_PER_ACTION * 4 * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
-        ball.frame = 0
-
-    @staticmethod
-    def draw(ball):
-        if ball.dir[0] <= 0:
-            Sonic.img.clip_draw(ball.location[0] + ball.real_size[0] * int(ball.frame), ball.location[1],
-                                ball.real_size[0], ball.real_size[1], ball.x, ball.y,
-                                ball.size[0], ball.size[1])
-        else:
-            Sonic.img.clip_composite_draw(ball.location[0] + ball.real_size[0] * int(ball.frame), ball.location[1],
-                                          ball.real_size[0], ball.real_size[1], 0, 'h', ball.x, ball.y,
-                                          ball.size[0], ball.size[1])
-
-
 class Thrown:
     @staticmethod
     def enter(ball, e):
@@ -106,10 +72,12 @@ class Thrown:
         ball.size[0] -= int(14 * Run_SPEED_PPS * game_framework.frame_time)
         ball.size[1] -= int(14 * Run_SPEED_PPS * game_framework.frame_time)
 
-        # test
-        # play_mode.player_rail.dead_line(ball)
 
-        if ball.x <= 0 - ball.size[0] // 2 or ball.x >= game_world.WIDTH + ball.size[0] // 2 or ball.y <= 0 - ball.size[1] // 2 or ball.y >= game_world.HEIGHT + ball.size[1] // 2:
+        if play_mode.player_rail.dead_line(ball):
+            ball.state_machine.cur_state.exit(ball, [])
+
+
+        if ball.x <= 0 - ball.size[0] // 2 + 10 or ball.x >= game_world.WIDTH + ball.size[0] // 2 or ball.y <= 0 - ball.size[1] // 2 or ball.y >= game_world.HEIGHT + ball.size[1] // 2:
             ball.state_machine.cur_state.exit(ball, [])
             return
 
@@ -315,7 +283,7 @@ class Sonic():
         self.state_machine.handle_event(('INPUT', event))
 
     def get_bb(self):
-        return self.x - self.size[0] // 2, self.y - self.size[1] // 2, self.x + self.size[0] // 2, self.y + self.size[1] // 2
+        return self.x - self.size[0] // 2 + 10, self.y - self.size[1] // 2+ 10, self.x + self.size[0] // 2 - 10, self.y + self.size[1] // 2 - 10
 
     def handle_collision(self, group, other):
         if group == 'ball:pin':
