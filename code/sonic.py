@@ -97,6 +97,11 @@ class Thrown:
         ball.frame = 0
         ball.real_size = [40, 35]
         ball.location = [605, 1210]
+
+        # 다음 캐릭터 순서로 넘어감
+        server.round.turn -= 1
+        if server.round.turn <= 0:
+            server.round.turn_change()
         pass
 
     @staticmethod
@@ -293,7 +298,7 @@ class StateMachine:
         self.cur_state.do(self.sonic)
 
     def handle_event(self, e):
-        if e[0] == 'INPUT' and e[1].type == SDL_MOUSEMOTION and self.cur_state != Thrown:
+        if e[0] == 'INPUT' and e[1].type == SDL_MOUSEMOTION and self.cur_state != Thrown and self.cur_state != Dead:
             self.sonic.dir = game_world.directtion([self.sonic.x, self.sonic.y ], [e[1].x, game_world.HEIGHT - e[1].y])
 
         for check_event, next_state in self.transitions[self.cur_state].items():

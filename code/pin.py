@@ -1,6 +1,7 @@
 from pico2d import *
 import game_world
 import game_framework
+import server
 
 pin_frame = [
     # 왼쪽으로
@@ -20,7 +21,7 @@ pin_size = [
 ]
 
 PIXEL_PER_METER = (10.0 / 0.3)
-Fall_SPEED_KMPH = 0.05
+Fall_SPEED_KMPH = 100.0
 Fall_SPEED_MPM = Fall_SPEED_KMPH * 1000.0 / 60.0
 Fall_SPEED_MPS = Fall_SPEED_MPM / 60.0
 Fall_SPEED_PPS = Fall_SPEED_MPS * PIXEL_PER_METER
@@ -46,6 +47,7 @@ class Dead:
     def exit(pin):
         # 충돌 오브젝트에서는 Standing에서 제거
         game_world.remove_object(pin)
+
         pass
 
     @staticmethod
@@ -94,11 +96,43 @@ class Standing:
             location += pin_frame[i][0]
         Pin.img.clip_draw(location, 0, pin.real_size[0], pin.real_size[1], pin.x, pin.y,  pin.size[0],  pin.size[1])
 
+class Producing:
+    @staticmethod
+    def enter(pin):
+        pin.frame = 4
+        pin.y += 170
+        pass
+
+    @staticmethod
+    def exit(pin):
+        pin.state_machine.cur_state = Standing
+        pin.state_machine.start()
+
+        server.round.processing()
+        pass
+
+    @staticmethod
+    def do(pin):
+        pin.y -= Fall_SPEED_KMPH * game_framework.frame_time
+
+        if pin.y <= pin.init_pos[1]:
+            pin.y = int(pin.y)
+            pin.state_machine.cur_state.exit(pin)
+        pass
+
+    @staticmethod
+    def draw(pin):
+        # 프레임에 따라 사이즈 변경
+        pin.real_size = pin_frame[pin.frame]
+        location = 0
+        for i in range(0, pin.frame):
+            location += pin_frame[i][0]
+        Pin.img.clip_draw(location, 0, pin.real_size[0], pin.real_size[1], pin.x, pin.y, pin.size[0], pin.size[1])
 
 class StateMachine:
     def __init__(self, pin):
         self.pin = pin
-        self.cur_state = Standing
+        self.cur_state = Producing
 
     def start(self):
         self.cur_state.enter(self.pin)
@@ -118,6 +152,7 @@ class Pin():
     def __init__(self, x = 450, y = 500):
         self.x = x
         self.y = y
+        self.init_pos = x, y
         self.frame = 0
         self.state_machine = StateMachine(self)
         self.state_machine.start()

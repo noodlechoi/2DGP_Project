@@ -8,21 +8,24 @@ from pin import Pin
 from sonic import Sonic
 import title_mode
 import server
+from round import Round
+
+first_pin = [450, 480]
+pin_list = [
+    [first_pin[0] - 30 * 3, first_pin[1] + 25 * 3], [first_pin[0] - 30 , first_pin[1] + 25 * 3], [first_pin[0] + 30 , first_pin[1] + 25 * 3], [first_pin[0] + 30 * 3, first_pin[1] + 25 * 3],
+    [first_pin[0] - 30 * 2, first_pin[1] + 25 * 2], [first_pin[0], first_pin[1] + 25 * 2], [first_pin[0] + 30 * 2, first_pin[1] + 25 * 2],
+    [first_pin[0] - 30 , first_pin[1] + 25], [first_pin[0] + 30, first_pin[1] + 25],
+    [first_pin[0], first_pin[1]]
+]
 
 def init():
     global pins
-    global pin_list
+
+    server.round = Round()
 
     server.player_rail = Rail()
     game_world.add_object(server.player_rail, 0)
 
-    first_pin = [450, 480]
-    pin_list = [
-        [first_pin[0] - 30 * 3, first_pin[1] + 25 * 3], [first_pin[0] - 30 , first_pin[1] + 25 * 3], [first_pin[0] + 30 , first_pin[1] + 25 * 3], [first_pin[0] + 30 * 3, first_pin[1] + 25 * 3],
-        [first_pin[0] - 30 * 2, first_pin[1] + 25 * 2], [first_pin[0], first_pin[1] + 25 * 2], [first_pin[0] + 30 * 2, first_pin[1] + 25 * 2],
-        [first_pin[0] - 30 , first_pin[1] + 25], [first_pin[0] + 30, first_pin[1] + 25],
-        [first_pin[0], first_pin[1]]
-    ]
     pins = [Pin(pin_list[i][0], pin_list[i][1]) for i in range(10)]
 
     game_world.add_objects(pins, 1)
@@ -42,24 +45,8 @@ def finish():
     game_world.clear()
     pass
 
-def reproduce_pins():
-    global pins
-    global pin_list
-    # pin이 다 쓰러지면 다시 생기기
-    is_exist_pin = False
-    for ol in game_world.objects:
-        for o in ol:
-            if type(Pin()) == type(o):
-                is_exist_pin = True
-
-    if not is_exist_pin:
-        pins = [Pin(pin_list[i][0], pin_list[i][1]) for i in range(10)]
-        game_world.add_objects(pins, 1)
-        for pin in pins:
-            game_world.add_collision_pair('ball:pin', None, pin)
-
 def update():
-    reproduce_pins()
+    server.round.update()
 
     game_world.update()
     game_world.handle_collisions()
@@ -73,8 +60,6 @@ def draw():
 
 
 def handle_events():
-    global player
-
     events = get_events()
     for event in events:
         if event.type == SDL_QUIT:
@@ -82,9 +67,10 @@ def handle_events():
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             game_framework.change_mode(title_mode)
         else:
-            server.player.handle_event(event)
-            if(event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT):
-                print(event.x, game_world.HEIGHT - event.y)
+            if server.round.is_processing():
+                server.player.handle_event(event)
+            # if(event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT):
+            #     print(event.x, game_world.HEIGHT - event.y)
 
     pass
 
@@ -94,4 +80,3 @@ def pause():
 
 def resume():
     pass
-
