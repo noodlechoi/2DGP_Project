@@ -9,6 +9,7 @@ from sonic import Sonic
 import title_mode
 import server
 from round import Round
+from npc import NPC
 
 first_pin = [450, 480]
 pin_list = [
@@ -30,11 +31,13 @@ def init():
 
     game_world.add_objects(pins, 1)
 
-
-    server.player = Sonic()
-    game_world.add_object(server.player, 2)
-
-    game_world.add_collision_pair('ball:pin', server.player, None)
+    server.npc = NPC()
+    game_world.add_object(server.npc)
+    # server.player = Sonic()
+    # game_world.add_object(server.player, 2)
+    #
+    # game_world.add_collision_pair('ball:pin', server.player, None)
+    game_world.add_collision_pair('ball:pin', server.npc, None)
     for pin in pins:
         game_world.add_collision_pair('ball:pin', None, pin)
 
@@ -66,9 +69,9 @@ def handle_events():
             game_framework.quit()
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             game_framework.change_mode(title_mode)
-        else:
-            if server.round.is_processing():
-                server.player.handle_event(event)
+        # else:
+        #     if server.round.is_processing():
+        #         server.player.handle_event(event)
             # if(event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT):
             #     print(event.x, game_world.HEIGHT - event.y)
 

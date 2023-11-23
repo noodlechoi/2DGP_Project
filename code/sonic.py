@@ -298,7 +298,10 @@ class StateMachine:
         self.cur_state.do(self.sonic)
 
     def handle_event(self, e):
-        if e[0] == 'INPUT' and e[1].type == SDL_MOUSEMOTION and self.cur_state != Thrown and self.cur_state != Dead:
+        if self.cur_state == Thrown or self.cur_state == Dead:
+            return
+
+        if e[0] == 'INPUT' and e[1].type == SDL_MOUSEMOTION:
             self.sonic.dir = game_world.directtion([self.sonic.x, self.sonic.y ], [e[1].x, game_world.HEIGHT - e[1].y])
 
         for check_event, next_state in self.transitions[self.cur_state].items():

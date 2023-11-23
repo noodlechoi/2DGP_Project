@@ -11,20 +11,17 @@ TIME_PER_ACTION = 1.0
 ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 FRAMES_PER_ACTION = 10
 
-animation_names = ['knuckles_sprite_sheet.png', 'tails_sprite_sheet.png', 'bean_sprite_sheet']
 
+knuckles_location = [
+    [270, 0], [1806, 1163]
+]
+knuckles_size = [
+    [32, 42], [31, 42]
+]
 
 class Standing:
     @staticmethod
     def enter(ball, e):
-        global FRAMES_PER_ACTION
-        ball.frame = 0
-        FRAMES_PER_ACTION = 6
-        ball.x = 450
-        ball.y = 100
-        ball.location = [42, 1625]
-        ball.real_size = [30, 45]
-        ball.size = [100, 150]
         pass
 
     @staticmethod
@@ -33,18 +30,17 @@ class Standing:
 
     @staticmethod
     def do(ball):
-        ball.frame = (ball.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
-
+        # ball.frame = (ball.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
+        ball.frame = 2
+        pass
 
     @staticmethod
     def draw(ball):
-        if ball.dir[0] <= 0:
-            NPC.img.clip_draw(ball.location[0] + ball.real_size[0] * int(ball.frame), ball.location[1], ball.real_size[0], ball.real_size[1], ball.x, ball.y,
-                                ball.size[0], ball.size[1])
-        else:
-            NPC.img.clip_composite_draw(ball.location[0] + ball.real_size[0] * int(ball.frame), ball.location[1],
-                                            ball.real_size[0], ball.real_size[1], 0, 'h', ball.x, ball.y,
-                                            ball.size[0], ball.size[1])
+        size_x = 0
+        for i in range(int(ball.frame)):
+            size_x += knuckles_size[0][0]
+        NPC.img.clip_draw(ball.location[0] + size_x, ball.location[1], ball.real_size[0], ball.real_size[1], ball.x, ball.y,
+                            ball.size[0], ball.size[1])
 
 
 class StateMachine:
@@ -65,23 +61,19 @@ class StateMachine:
 
 
 class NPC():
-    images = None
-    def load_images(self):
-        if NPC.images == None:
-            NPC.images = {}
-            for name in animation_names:
-                NPC.images[name] = [load_image("../resource/" + name + ".png")]
-
+    img = None
     def __init__(self):
         self.x = 450
         self.y = 100
-        self.location = [42, 1625]
-        self.real_size = [30, 45]
+        self.location = [0, 0]
+        self.real_size = [32, 42]
         self.size = [100, 150]
         self.dir = [0, 0]
         self.frame = 0
         self.state_machine = StateMachine(self)
         self.state_machine.start()
+        if NPC.img == None:
+            NPC.img = load_image('../resource/knuckles_sprite_sheet(2).png')
 
     def draw(self):
         self.state_machine.draw()
@@ -89,9 +81,6 @@ class NPC():
 
     def update(self):
         self.state_machine.update()
-
-    def handle_event(self, event):
-        self.state_machine.handle_event(('INPUT', event))
 
     def get_bb(self):
         return self.x - self.size[0] // 2 + 10, self.y - self.size[1] // 2 + 10, self.x + self.size[
