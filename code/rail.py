@@ -19,7 +19,7 @@ class Rail():
     img = None
     def __init__(self):
         self.rail_bar = RailBar()
-        self.line = { 'back' : [[340, 530], [550, 530]], 'left' : [[0, 240], [350, 530]], 'right' : [[900, 240], [550, 530]]}
+        self.line = { 'back' : [[340, 530], [550, 530]], 'left' : [[0, 240], [350, 540]], 'right' : [[900, 240], [550, 540]]}
         game_world.add_object(self.rail_bar, 3)
         if Rail.img == None:
             Rail.img = load_image('../resource/bowling_rail.png')

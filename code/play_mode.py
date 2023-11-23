@@ -7,16 +7,14 @@ from rail import Rail
 from pin import Pin
 from sonic import Sonic
 import title_mode
+import server
 
 def init():
-    global player_rail
     global pins
-    global player
-    global arrow
     global pin_list
 
-    player_rail = Rail()
-    game_world.add_object(player_rail, 0)
+    server.player_rail = Rail()
+    game_world.add_object(server.player_rail, 0)
 
     first_pin = [450, 480]
     pin_list = [
@@ -30,10 +28,10 @@ def init():
     game_world.add_objects(pins, 1)
 
 
-    player = Sonic()
-    game_world.add_object(player, 2)
+    server.player = Sonic()
+    game_world.add_object(server.player, 2)
 
-    game_world.add_collision_pair('ball:pin', player, None)
+    game_world.add_collision_pair('ball:pin', server.player, None)
     for pin in pins:
         game_world.add_collision_pair('ball:pin', None, pin)
 
@@ -84,7 +82,7 @@ def handle_events():
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             game_framework.change_mode(title_mode)
         else:
-            player.handle_event(event)
+            server.player.handle_event(event)
             if(event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT):
                 print(event.x, game_world.HEIGHT - event.y)
 

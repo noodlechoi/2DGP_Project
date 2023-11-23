@@ -4,13 +4,13 @@ import game_framework
 import game_world
 from arrow import Arrow
 import math
-import play_mode
+import server
 
 PIXEL_PER_METER = (10.0 / 0.3)
-Run_SPEED_KMPH = 1.0
-Run_SPEED_MPM = Run_SPEED_KMPH * 1000.0 / 60.0
-Run_SPEED_MPS = Run_SPEED_MPM / 60.0
-Run_SPEED_PPS = Run_SPEED_MPS * PIXEL_PER_METER
+RUN_SPEED_KMPH = 1.0
+RUN_SPEED_MPM = RUN_SPEED_KMPH * 1000.0 / 60.0
+RUN_SPEED_MPS = RUN_SPEED_MPM / 60.0
+RUN_SPEED_PPS = RUN_SPEED_MPS * PIXEL_PER_METER
 
 # 시간 당 프레임
 TIME_PER_ACTION = 1.0
@@ -36,6 +36,56 @@ def a_down(e, ball):
 
 def time_out(e, ball):
     return e[0] == 'TIME_OUT'
+
+
+class Dead:
+    @staticmethod
+    def enter(ball, e):
+        global FRAMES_PER_ACTION
+        global t
+        t = 0
+        FRAMES_PER_ACTION = 5
+        ball.frame = 0
+        ball.real_size = [40, 35]
+        ball.location = [605, 1210]
+        game_world.remove_collision_object(ball)
+        pass
+
+    @staticmethod
+    def exit(ball, e):
+        ball.state_machine.cur_state = Standing
+        ball.state_machine.start()
+        game_world.add_collision_pair('ball:pin', ball, None)
+        pass
+
+    @staticmethod
+    def do(ball):
+        global t
+        ball.move_dead_line(t)
+        t += game_framework.frame_time / 2
+
+        # 크기가 원근감 있게 줄어듦
+        ball.size[0] -= int(16 * RUN_SPEED_PPS * game_framework.frame_time)
+        ball.size[1] -= int(16 * RUN_SPEED_PPS * game_framework.frame_time)
+
+        # rail 밖으로 나갔을 때
+        if ball.x <= 0 - ball.size[0] // 2 + 10 or ball.x >= game_world.WIDTH + ball.size[0] // 2 or ball.y >= 530:
+            ball.state_machine.cur_state.exit(ball, [])
+            return
+
+        ball.frame = (ball.frame + FRAMES_PER_ACTION * 4 * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
+
+    @staticmethod
+    def draw(ball):
+        if ball.dir[0] <= 0:
+            Sonic.img.clip_draw(ball.location[0] + ball.real_size[0] * int(ball.frame), ball.location[1],
+                                ball.real_size[0], ball.real_size[1], ball.x, ball.y,
+                                ball.size[0], ball.size[1])
+        else:
+            Sonic.img.clip_composite_draw(ball.location[0] + ball.real_size[0] * int(ball.frame), ball.location[1],
+                                          ball.real_size[0], ball.real_size[1], 0, 'h', ball.x, ball.y,
+                                          ball.size[0], ball.size[1])
+
 
 class Thrown:
     @staticmethod
@@ -65,20 +115,21 @@ class Thrown:
 
         time += game_framework.frame_time
 
-        ball.x += (-1) * ball.dir[0] * Run_SPEED_PPS * game_framework.frame_time + curve
-        ball.y += (-1) * ball.dir[1] * Run_SPEED_PPS * game_framework.frame_time + curve
+        ball.x += (-1) * ball.dir[0] * RUN_SPEED_PPS * game_framework.frame_time + curve
+        ball.y += (-1) * ball.dir[1] * RUN_SPEED_PPS * game_framework.frame_time + curve
 
         # 크기가 원근감 있게 줄어듦
-        ball.size[0] -= int(14 * Run_SPEED_PPS * game_framework.frame_time)
-        ball.size[1] -= int(14 * Run_SPEED_PPS * game_framework.frame_time)
+        ball.size[0] -= int(14 * RUN_SPEED_PPS * game_framework.frame_time)
+        ball.size[1] -= int(14 * RUN_SPEED_PPS * game_framework.frame_time)
 
         
         # rail 밖으로 나갔을 때
-        if ball.x <= 0 - ball.size[0] // 2 + 10 or ball.x >= game_world.WIDTH + ball.size[0] // 2 or ball.y <= 0 - ball.size[1] // 2 or ball.y >= game_world.HEIGHT + ball.size[1] // 2:
+        if ball.x <= 0 - ball.size[0] // 2 + 10 or ball.x >= game_world.WIDTH + ball.size[0] // 2 or ball.y >= 530:
             ball.state_machine.cur_state.exit(ball, [])
             return
-        if play_mode.player_rail.dead_line(ball):
-            ball.state_machine.cur_state.exit(ball, [])
+        if server.player_rail.dead_line(ball):
+            ball.state_machine.cur_state = Dead
+            ball.state_machine.start()
             return
         
         ball.frame = (ball.frame + FRAMES_PER_ACTION * 4 * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
@@ -231,7 +282,8 @@ class StateMachine:
             Standing : {mouse_left_down: Run, a_down: Standing},
             Run : {time_out: Rolling, mouse_left_up : Thrown},
             Rolling : {mouse_left_up : Thrown},
-            Thrown : {}
+            Thrown : {},
+            Dead : {},
         }
 
     def start(self):
@@ -288,3 +340,11 @@ class Sonic():
     def handle_collision(self, group, other):
         if group == 'ball:pin':
             pass
+
+
+    def move_dead_line(self, t):
+        # 오른쪽 레일로 갈 때
+        if self.dir[0] < 0:
+            self.x, self.y = game_world.get_dots([self.x, self.y], server.player_rail.line['right'][1], t)
+        else:
+            self.x, self.y = game_world.get_dots([self.x, self.y], server.player_rail.line['left'][1], t)
