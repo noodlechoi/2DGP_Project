@@ -26,17 +26,19 @@ def init():
 
     server.player_rail = Rail()
     game_world.add_object(server.player_rail, 0)
+    server.npc_rail = Rail()
+    game_world.add_object(server.npc_rail, 0)
 
     pins = [Pin(pin_list[i][0], pin_list[i][1]) for i in range(10)]
-
     game_world.add_objects(pins, 1)
 
     server.npc = Knuckles()
-    game_world.add_object(server.npc)
-    # server.player = Sonic()
-    # game_world.add_object(server.player, 2)
-    #
-    # game_world.add_collision_pair('ball:pin', server.player, None)
+    game_world.add_object(server.npc, 2)
+
+    server.player = Sonic()
+    game_world.add_object(server.player, 2)
+
+    game_world.add_collision_pair('ball:pin', server.player, None)
     game_world.add_collision_pair('ball:pin', server.npc, None)
     for pin in pins:
         game_world.add_collision_pair('ball:pin', None, pin)
@@ -69,9 +71,9 @@ def handle_events():
             game_framework.quit()
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             game_framework.change_mode(title_mode)
-        # else:
-        #     if server.round.is_processing():
-        #         server.player.handle_event(event)
+        else:
+            if server.round.who_turn == 'player' and server.round.is_processing():
+                server.player.handle_event(event)
             # if(event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT):
             #     print(event.x, game_world.HEIGHT - event.y)
 

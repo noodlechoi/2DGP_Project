@@ -49,6 +49,7 @@ class Dead:
         ball.real_size = [40, 35]
         ball.location = [605, 1210]
         game_world.remove_collision_object(ball)
+
         pass
 
     @staticmethod
@@ -56,22 +57,27 @@ class Dead:
         ball.state_machine.cur_state = Standing
         ball.state_machine.start()
         game_world.add_collision_pair('ball:pin', ball, None)
+
+        # 다음 캐릭터 순서로 넘어감
+        server.round.turn -= 1
+        if server.round.turn <= 0:
+            server.round.turn_change()
         pass
 
     @staticmethod
     def do(ball):
         global t
+        # rail 밖으로 나갔을 때
+        if ball.x <= 0 - ball.size[0] // 2 + 10 or ball.x >= game_world.WIDTH + ball.size[0] // 2 or ball.y >= 530:
+            ball.state_machine.cur_state.exit(ball, [])
+            return
+
         ball.move_dead_line(t)
         t += game_framework.frame_time / 2
 
         # 크기가 원근감 있게 줄어듦
         ball.size[0] -= int(16 * RUN_SPEED_PPS * game_framework.frame_time)
         ball.size[1] -= int(16 * RUN_SPEED_PPS * game_framework.frame_time)
-
-        # rail 밖으로 나갔을 때
-        if ball.x <= 0 - ball.size[0] // 2 + 10 or ball.x >= game_world.WIDTH + ball.size[0] // 2 or ball.y >= 530:
-            ball.state_machine.cur_state.exit(ball, [])
-            return
 
         ball.frame = (ball.frame + FRAMES_PER_ACTION * 4 * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
 
@@ -98,12 +104,6 @@ class Thrown:
         ball.real_size = [40, 35]
         ball.location = [605, 1210]
 
-        # 다음 캐릭터 순서로 넘어감
-        server.round.turn -= 1
-        if server.round.turn <= 0:
-            server.round.turn_change()
-        pass
-
     @staticmethod
     def exit(ball, e):
         ball.state_machine.cur_state = Standing
@@ -129,10 +129,7 @@ class Thrown:
 
         
         # rail 밖으로 나갔을 때
-        if ball.x <= 0 - ball.size[0] // 2 + 10 or ball.x >= game_world.WIDTH + ball.size[0] // 2 or ball.y >= 530:
-            ball.state_machine.cur_state.exit(ball, [])
-            return
-        if server.player_rail.dead_line(ball):
+        if server.player_rail.dead_line(ball) or (ball.x <= 0 - ball.size[0] // 2 + 10 or ball.x >= game_world.WIDTH + ball.size[0] // 2 or ball.y >= 530):
             ball.state_machine.cur_state = Dead
             ball.state_machine.start()
             return
@@ -333,11 +330,13 @@ class Sonic():
             Sonic.img = load_image('../resource/sonic_sprite_sheet(1).png')
 
     def draw(self):
-        self.state_machine.draw()
-        draw_rectangle(*self.get_bb())
+        if server.round.who_turn == 'player':
+            self.state_machine.draw()
+            draw_rectangle(*self.get_bb())
 
     def update(self):
-        self.state_machine.update()
+        if server.round.who_turn == 'player':
+            self.state_machine.update()
 
     def handle_event(self, event):
         self.state_machine.handle_event(('INPUT', event))

@@ -1,8 +1,11 @@
+import random
+
 from pico2d import *
 import game_framework
 import game_world
 from arrow import Arrow
 from behavior_tree import BehaviorTree, Action, Sequence, Condition, Selector
+import server
 
 PIXEL_PER_METER = (10.0 / 0.3)  # 10 pixel 30 cm
 RUN_SPEED_KMPH = 1.0  # Km / Hour
@@ -13,6 +16,109 @@ RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
 TIME_PER_ACTION = 1.0
 ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 FRAMES_PER_ACTION = 10
+
+class Dead:
+    @staticmethod
+    def enter(ball):
+        global FRAMES_PER_ACTION
+        global t
+        t = 0
+        game_world.remove_collision_object(ball)
+        pass
+
+    @staticmethod
+    def exit(ball):
+        ball.state_machine.cur_state = Standing
+        ball.state_machine.start()
+        game_world.add_collision_pair('ball:pin', ball, None)
+
+
+        # 다음 캐릭터 순서로 넘어감
+        server.round.turn -= 1
+        if server.round.turn <= 0:
+            server.round.turn_change()
+        pass
+
+    @staticmethod
+    def do(ball):
+        # rail 밖으로 나갔을 때
+        if ball.x <= 0 - ball.size[0] // 2 + 10 or ball.x >= game_world.WIDTH + ball.size[0] // 2 or ball.y >= 530:
+            ball.state_machine.cur_state.exit(ball)
+            return
+
+        global t
+        ball.move_dead_line(t)
+        t += game_framework.frame_time / 2
+
+        # 크기가 원근감 있게 줄어듦
+        ball.size[0] -= int(16 * RUN_SPEED_PPS * game_framework.frame_time)
+        ball.size[1] -= int(16 * RUN_SPEED_PPS * game_framework.frame_time)
+
+        ball.frame = (ball.frame + FRAMES_PER_ACTION * 4 * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
+
+    @staticmethod
+    def draw(ball):
+        if ball.dir[0] <= 0:
+            NPC.img.clip_draw(ball.location[0] + ball.real_size[0] * int(ball.frame) + ball.padding, ball.location[1],
+                              ball.real_size[0], ball.real_size[1], ball.x, ball.y,
+                              ball.size[0], ball.size[1])
+        else:
+            NPC.img.clip_composite_draw(ball.location[0] + ball.real_size[0] * int(ball.frame) + ball.padding,
+                                        ball.location[1],
+                                        ball.real_size[0], ball.real_size[1], 0, 'h', ball.x, ball.y,
+                                        ball.size[0], ball.size[1])
+
+
+class Throw:
+    @staticmethod
+    def enter(ball):
+        global time
+        ball.enter_init()
+        time = 0
+
+        pass
+
+    @staticmethod
+    def exit(ball):
+        ball.state_machine.cur_state = Standing
+        ball.state_machine.start()
+        pass
+
+    @staticmethod
+    def do(ball):
+        global time
+        # 시간이 지나면 회전하도록
+        curve = -110 * math.sin(math.radians(time))
+        # curve가 -3이 넘으면 다시 아래로 내려가는 것을 방지
+        if curve <= -3: curve = -2
+
+        time += game_framework.frame_time
+
+        ball.x += (-1) * ball.dir[0] * RUN_SPEED_PPS * game_framework.frame_time + curve
+        ball.y += (-1) * ball.dir[1] * RUN_SPEED_PPS * game_framework.frame_time + curve
+
+        # 크기가 원근감 있게 줄어듦
+        ball.size[0] -= int(14 * RUN_SPEED_PPS * game_framework.frame_time)
+        ball.size[1] -= int(14 * RUN_SPEED_PPS * game_framework.frame_time)
+
+        # rail 밖으로 나갔을 때
+        if server.npc_rail.dead_line(ball) or (ball.x <= 0 - ball.size[0] // 2 + 10 or ball.x >= game_world.WIDTH + ball.size[0] // 2 or ball.y >= 530):
+            ball.state_machine.cur_state = Dead
+            ball.state_machine.start()
+            return
+
+        ball.frame = (ball.frame + FRAMES_PER_ACTION * 4 * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
+
+    @staticmethod
+    def draw(ball):
+        if ball.dir[0] <= 0:
+            NPC.img.clip_draw(ball.location[0] + ball.real_size[0] * int(ball.frame) + ball.padding, ball.location[1],
+                                ball.real_size[0], ball.real_size[1], ball.x, ball.y,
+                                ball.size[0], ball.size[1])
+        else:
+            NPC.img.clip_composite_draw(ball.location[0] + ball.real_size[0] * int(ball.frame)+ ball.padding, ball.location[1],
+                                          ball.real_size[0], ball.real_size[1], 0, 'h', ball.x, ball.y,
+                                          ball.size[0], ball.size[1])
 
 
 class Rolling:
@@ -31,12 +137,17 @@ class Rolling:
 
         game_world.remove_object(arrow)
         ball.dir = game_world.directtion([ball.x, ball.y], [arrow.x, arrow.y])
+        ball.state_machine.cur_state = Throw
+        ball.state_machine.start()
         pass
 
     @staticmethod
     def do(ball):
+        global arrow
+        if int(arrow.degree) == ball.target_degree:
+            ball.state_machine.cur_state.exit(ball)
+
         ball.frame = (ball.frame + FRAMES_PER_ACTION * 3 * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
-        # ball.frame = 4
         ball.frame_cal()
 
         ball.dir = game_world.directtion([ball.x, ball.y], [arrow.x, arrow.y])
@@ -103,8 +214,10 @@ class Run:
 class Standing:
     @staticmethod
     def enter(ball):
-        ball.enter_init()
+        ball.x = 450
+        ball.y = 100
         ball.wait_time = get_time()
+        ball.enter_init()
         pass
 
     @staticmethod
@@ -117,7 +230,6 @@ class Standing:
     def do(ball):
         if (get_time() - ball.wait_time > 3):
             ball.state_machine.cur_state.exit(ball)
-            return
 
         ball.frame = (ball.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
         # ball.frame = 9
@@ -136,8 +248,6 @@ class StateMachine:
     def __init__(self, npc):
         self.npc = npc
         self.cur_state = Standing
-        self.transitions = {
-        }
 
     def start(self):
         self.cur_state.enter(self.npc)
@@ -160,18 +270,21 @@ class NPC():
         self.dir = [0, 0]
         self.frame = 0
         self.padding = 0
+        self.coin = 0
+        self.target_degree = 0
         self.state_machine = StateMachine(self)
-        self.state_machine.start()
         self.build_behavior_tree()
 
 
     def draw(self):
-        self.state_machine.draw()
-        draw_rectangle(*self.get_bb())
+        if server.round.who_turn == 'npc':
+            self.state_machine.draw()
+            draw_rectangle(*self.get_bb())
 
     def update(self):
-        self.state_machine.update()
-        self.bt.run()
+        if server.round.who_turn == 'npc':
+            self.bt.run()
+            self.state_machine.update()
 
     def get_bb(self):
         return self.x - self.size[0] // 2 + 10, self.y - self.size[1] // 2 + 10, self.x + self.size[
@@ -181,14 +294,41 @@ class NPC():
         if group == 'ball:pin':
             pass
 
+    def move_dead_line(self, t):
+        # 오른쪽 레일로 갈 때
+        if self.dir[0] < 0:
+            self.x, self.y = game_world.get_dots([self.x, self.y], server.npc_rail.line['right'][1], t)
+        else:
+            self.x, self.y = game_world.get_dots([self.x, self.y], server.npc_rail.line['left'][1], t)
 
-    def test(self):
+    def is_my_turn(self):
+        if server.round.who_turn == 'npc':
+            return BehaviorTree.SUCCESS
+
+
+    def is_remain_coin(self):
+        if self.coin >= 10:
+            return BehaviorTree.SUCCESS
+        return BehaviorTree.FAIL
         pass
 
-    def build_behavior_tree(self):
-        a1 = Action('test', self.test)
-        root = Sequence('test', a1)
-        self.bt = BehaviorTree(root)
+    def use_skill(self):
+        pass
+
+    def is_remained_turn(self):
+        if server.round.turn >= 0:
+            return BehaviorTree.SUCCESS
+        return BehaviorTree.FAIL
+
+    def set_range(self, s, e):
+        if self.state_machine.cur_state == Standing:
+            self.state_machine.cur_state.exit(self)
+            self.target_degree = random.randint(s, e)
+
+        pass
+
+    def throw(self):
+        pass
 
 
 class Knuckles(NPC):
@@ -214,8 +354,9 @@ class Knuckles(NPC):
         global FRAMES_PER_ACTION
         if self.state_machine.cur_state == Standing:
             FRAMES_PER_ACTION = 10
+            self.size = [100, 150]
             self.frame = 0
-            self.real_size = [32, 40]
+            self.real_size = [32, 42]
             self.location = [0, 0]
             self.padding = 0
         elif self.state_machine.cur_state == Run:
@@ -230,7 +371,12 @@ class Knuckles(NPC):
             self.real_size = [32, 40]
             self.location = [5 + 32, 44 * 2]
             self.padding = 0
-
+        elif self.state_machine.cur_state == Throw:
+            FRAMES_PER_ACTION = 4
+            self.frame = 0
+            self.real_size = [32, 40]
+            self.location = [5 + 32, 44 * 2]
+            self.padding = 0
 
     def frame_cal(self):
         if self.state_machine.cur_state == Standing:
@@ -290,8 +436,28 @@ class Knuckles(NPC):
                     self.padding = 0
                 case 3:
                     self.padding = 3
-
-    pass
-
+        elif self.state_machine.cur_state == Throw:
+            match int(self.frame):
+                case 0:
+                    self.padding = 0
+                case 3:
+                    self.padding = 3
     def build_behavior_tree(self):
-        super().build_behavior_tree()
+        # 스킬 사용
+        c1 = Condition('Did coin remain?', self.is_remain_coin)
+        a1 = Action('use skill', self.use_skill)
+        SEQ_SKILL = Sequence('use skill', c1, a1)
+
+        # 발사
+        c2 = Condition('Did turn remain?', self.is_remained_turn)
+        a2 = Action('set range', self.set_range, 80, 90)
+        a3 = Action('throw', self.throw)
+        SEQ_THROW = Sequence('throw', c2, a2, a3)
+
+        # 스킬/반사
+        SEL_SKILL_THROW = Selector('skill or throw', SEQ_SKILL, SEQ_THROW)
+
+        c3 = Condition('now my turn?', self.is_my_turn)
+        root = Sequence('turn progress', c3, SEL_SKILL_THROW)
+
+        self.bt = BehaviorTree(root)
