@@ -2,6 +2,7 @@ from pico2d import *
 import game_framework
 import game_world
 from arrow import Arrow
+from behavior_tree import BehaviorTree, Action, Sequence, Condition, Selector
 
 PIXEL_PER_METER = (10.0 / 0.3)  # 10 pixel 30 cm
 RUN_SPEED_KMPH = 1.0  # Km / Hour
@@ -161,6 +162,7 @@ class NPC():
         self.padding = 0
         self.state_machine = StateMachine(self)
         self.state_machine.start()
+        self.build_behavior_tree()
 
 
     def draw(self):
@@ -169,6 +171,7 @@ class NPC():
 
     def update(self):
         self.state_machine.update()
+        self.bt.run()
 
     def get_bb(self):
         return self.x - self.size[0] // 2 + 10, self.y - self.size[1] // 2 + 10, self.x + self.size[
@@ -177,6 +180,16 @@ class NPC():
     def handle_collision(self, group, other):
         if group == 'ball:pin':
             pass
+
+
+    def test(self):
+        pass
+
+    def build_behavior_tree(self):
+        a1 = Action('test', self.test)
+        root = Sequence('test', a1)
+        self.bt = BehaviorTree(root)
+
 
 class Knuckles(NPC):
     def __init__(self):
@@ -279,3 +292,6 @@ class Knuckles(NPC):
                     self.padding = 3
 
     pass
+
+    def build_behavior_tree(self):
+        super().build_behavior_tree()
