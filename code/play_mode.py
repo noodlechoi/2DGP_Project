@@ -9,7 +9,7 @@ from sonic import Sonic
 import title_mode
 import server
 from round import Round
-from npc import NPC
+from npc import NPC, Knuckles
 
 first_pin = [450, 480]
 pin_list = [
@@ -31,7 +31,7 @@ def init():
 
     game_world.add_objects(pins, 1)
 
-    server.npc = NPC()
+    server.npc = Knuckles()
     game_world.add_object(server.npc)
     # server.player = Sonic()
     # game_world.add_object(server.player, 2)
