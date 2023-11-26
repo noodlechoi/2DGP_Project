@@ -124,19 +124,16 @@ class Throw:
 class Rolling:
     @staticmethod
     def enter(ball):
-        global arrow
         ball.enter_init()
 
-        arrow = Arrow()
-        game_world.add_object(arrow, 1)
+        ball.arrow = Arrow()
+        game_world.add_object(ball.arrow, 1)
         pass
 
     @staticmethod
     def exit(ball):
-        global arrow
-
-        game_world.remove_object(arrow)
-        ball.dir = game_world.directtion([ball.x, ball.y], [arrow.x, arrow.y])
+        game_world.remove_object(ball.arrow)
+        ball.dir = game_world.directtion([ball.x, ball.y], [ball.arrow.x, ball.arrow.y])
         ball.state_machine.cur_state = Throw
         ball.state_machine.start()
         pass
@@ -144,13 +141,12 @@ class Rolling:
     @staticmethod
     def do(ball):
         global arrow
-        if int(arrow.degree) == ball.target_degree:
-            ball.state_machine.cur_state.exit(ball)
+
 
         ball.frame = (ball.frame + FRAMES_PER_ACTION * 3 * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
         ball.frame_cal()
 
-        ball.dir = game_world.directtion([ball.x, ball.y], [arrow.x, arrow.y])
+        ball.dir = game_world.directtion([ball.x, ball.y], [ball.arrow.x, ball.arrow.y])
 
     @staticmethod
     def draw(ball):
@@ -166,20 +162,17 @@ class Rolling:
 class Run:
     @staticmethod
     def enter(ball):
-        global arrow
         ball.enter_init()
         ball.frame = 0
 
-        arrow = Arrow()
-        game_world.add_object(arrow, 1)
+        ball.arrow = Arrow()
+        game_world.add_object(ball.arrow, 1)
         pass
 
     @staticmethod
     def exit(ball):
-        global arrow
-
         # Run 상태에서 Thrown 상태가 될 수 있기 때문에
-        game_world.remove_object(arrow)
+        game_world.remove_object(ball.arrow)
         ball.state_machine.cur_state = Rolling
         ball.state_machine.start()
         pass
@@ -194,7 +187,7 @@ class Run:
         ball.frame_cal()
 
         # 화살표에 따라 방향 설정
-        ball.dir = game_world.directtion([ball.x, ball.y], [arrow.x, arrow.y])
+        ball.dir = game_world.directtion([ball.x, ball.y], [ball.arrow.x, ball.arrow.y])
 
         pass
 
@@ -270,7 +263,7 @@ class NPC():
         self.dir = [0, 0]
         self.frame = 0
         self.padding = 0
-        self.coin = 0
+        self.coin = 10
         self.target_degree = 0
         self.state_machine = StateMachine(self)
         self.build_behavior_tree()
@@ -304,6 +297,7 @@ class NPC():
     def is_my_turn(self):
         if server.round.who_turn == 'npc':
             return BehaviorTree.SUCCESS
+        return BehaviorTree.FAIL
 
 
     def is_remain_coin(self):
@@ -313,6 +307,13 @@ class NPC():
         pass
 
     def use_skill(self):
+        if self.state_machine.cur_state == Standing:
+            self.coin -= 10
+            # 스킬 사용
+
+            self.wait_time = get_time()
+            return BehaviorTree.SUCCESS
+        return BehaviorTree.FAIL
         pass
 
     def is_remained_turn(self):
@@ -322,12 +323,18 @@ class NPC():
 
     def set_range(self, s, e):
         if self.state_machine.cur_state == Standing:
-            self.state_machine.cur_state.exit(self)
             self.target_degree = random.randint(s, e)
+            return BehaviorTree.SUCCESS
+        return BehaviorTree.FAIL
 
         pass
 
     def throw(self):
+        if self.state_machine.cur_state == Rolling:
+            if int(self.arrow.degree) == self.target_degree:
+                self.state_machine.cur_state.exit(self)
+                return BehaviorTree.SUCCESS
+        return BehaviorTree.FAIL
         pass
 
 
@@ -442,6 +449,7 @@ class Knuckles(NPC):
                     self.padding = 0
                 case 3:
                     self.padding = 3
+
     def build_behavior_tree(self):
         # 스킬 사용
         c1 = Condition('Did coin remain?', self.is_remain_coin)

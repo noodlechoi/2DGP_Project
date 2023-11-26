@@ -7,6 +7,7 @@ import server
 class Ready: # 핀이 내려오고 있는 단계
     @staticmethod
     def enter(round):
+
         pass
 
     @staticmethod
@@ -22,8 +23,6 @@ class Ready: # 핀이 내려오고 있는 단계
 class Processing:# 핀이 내려오고 난 후
     @staticmethod
     def enter(round):
-        if round.who_turn == 'npc':
-            server.npc.state_machine.start()
         pass
 
     @staticmethod
