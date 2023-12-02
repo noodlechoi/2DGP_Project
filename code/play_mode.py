@@ -60,6 +60,7 @@ def update():
 def draw():
     clear_canvas()
     game_world.render()
+    server.round.draw()
     update_canvas()
     pass
 
