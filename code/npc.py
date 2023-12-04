@@ -221,7 +221,7 @@ class Standing:
 
     @staticmethod
     def do(ball):
-        if (get_time() - ball.wait_time > 3):
+        if (get_time() - ball.wait_time > 1):
             ball.state_machine.cur_state.exit(ball)
 
         ball.frame = (ball.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION

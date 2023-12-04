@@ -1,4 +1,4 @@
-objects = [[] for _ in range(6)]
+objects = [[] for _ in range(7)]
 collision_pairs = {}
 
 WIDTH = 900

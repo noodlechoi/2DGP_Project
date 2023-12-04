@@ -4,6 +4,7 @@ from pin import Pin
 from pico2d import *
 import game_framework
 import server
+from font import Font
 
 
 PIXEL_PER_METER = (10.0 / 0.3)
@@ -71,14 +72,67 @@ class TurnStart: # 한 턴이 시작될 때
 class Next:
     @staticmethod
     def enter(round):
+        global fonts
+
         round.cur_round += 1
         if(round.cur_round == 1):
-            round.player_score = []
-            round.npc_score = []
+            round.player_score = dict()
+            round.npc_score = dict()
             round.is_last = False
         if(round.cur_round == 10):
             round.is_last = True
         round.score_x, round.score_y = game_world.WIDTH // 2, game_world.HEIGHT
+
+        # font
+        fonts = []
+        player_first_score = [[35, 445], [60, 463], [95, 463]]
+        next_round = 85
+        for r, s in round.player_score.items():
+            for turn in s.keys():
+                if round.is_last:
+                    if turn == 3:
+                        fonts.append(
+                            Font(s[turn], player_first_score[0][0] + next_round * (r - 1), player_first_score[0][1],
+                                 [27, 35]))
+                    elif turn == 2:
+                        fonts.append(
+                            Font(s[turn], player_first_score[1][0] + next_round * (r - 1), player_first_score[1][1],
+                                 [20, 30]))
+                    else:
+                        fonts.append(
+                            Font(s[turn], player_first_score[2][0] + next_round * (r - 1), player_first_score[2][1],
+                                 [20, 30]))
+                else:
+                    if turn == 2:
+                        fonts.append(
+                            Font(s[turn], player_first_score[0][0] + next_round * (r - 1), player_first_score[0][1],
+                                 [27, 35]))
+                    elif turn == 1:
+                        fonts.append(
+                            Font(s[turn], player_first_score[1][0] + next_round * (r - 1), player_first_score[1][1],
+                                 [20, 30]))
+
+        npc_first_score = [[35, 340], [60, 360]]
+        for r, s in round.npc_score.items():
+            for turn in s.keys():
+                if round.is_last:
+                    if turn == 3:
+                        fonts.append(
+                            Font(s[turn], npc_first_score[0][0] + next_round * (r - 1), npc_first_score[0][1], [27, 35]))
+                    elif turn == 2:
+                        fonts.append(
+                            Font(s[turn], npc_first_score[1][0] + next_round * (r - 1), npc_first_score[1][1], [20, 30]))
+                    else:
+                        fonts.append(
+                            Font(s[turn], npc_first_score[2][0] + next_round * (r - 1), npc_first_score[2][1], [20, 30]))
+                else:
+                    if turn == 2:
+                        fonts.append(
+                            Font(s[turn], npc_first_score[0][0] + next_round * (r - 1), npc_first_score[0][1], [27, 35]))
+                    elif turn == 1:
+                        fonts.append(
+                            Font(s[turn], npc_first_score[1][0] + next_round * (r - 1), npc_first_score[1][1], [20, 30]))
+
         pass
 
     @staticmethod
@@ -87,8 +141,7 @@ class Next:
             round.last()
             return
         round.processing()
-        print(round.player_score)
-        print(round.npc_score)
+
         pass
 
     @staticmethod
@@ -97,14 +150,20 @@ class Next:
             round.score_y -= DROP_SPEED_PPS * game_framework.frame_time * 20
             round.wait_time = get_time()
 
-        if get_time() - round.wait_time > 1:
+        if get_time() - round.wait_time > 2:
             round.state_machine.cur_state.exit(round)
         pass
 
     @staticmethod
     def draw(round):
+        global fonts
         Round.score_img.clip_draw(5, 65, 410, 145, round.score_x, round.score_y, game_world.WIDTH - 20, game_world.HEIGHT // 3)
+
+        if round.score_y <= game_world.HEIGHT // 2:
+            for font in fonts:
+                font.draw()
         pass
+
 
 class Last:
     @staticmethod
@@ -161,8 +220,20 @@ class Round:
     def update(self):
         self.state_machine.update()
 
+        # 마지막 차례에 스페어나 스트라이크가 아니면 기회 X
+        if self.cur_round == 10:
+            if self.turn == 1:
+                if not self.is_all_thrown():
+                    self.turn_change()
+
+        # strike면 다음 턴
+        if self.is_all_thrown():
+            self.turn_change()
+
 
     def draw(self):
+
+
         self.state_machine.draw()
 
     def turn_change(self):
@@ -208,7 +279,7 @@ class Round:
             return True
         return False
 
-    def reproduce_pins(self):
+    def is_all_thrown(self):
         global pins
         # pin이 다 쓰러지면 다시 생기기
         is_exist_pin = False
@@ -218,6 +289,11 @@ class Round:
                     is_exist_pin = True
 
         if not is_exist_pin:
+            return True
+        return False
+
+    def reproduce_pins(self):
+        if self.is_all_thrown():
             self.refill_pins()
 
     def change_pins(self):
