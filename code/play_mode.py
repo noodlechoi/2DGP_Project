@@ -10,6 +10,7 @@ import title_mode
 import server
 from round import Round
 from npc import NPC, Knuckles
+from font import Font
 
 first_pin = [450, 480]
 pin_list = [
@@ -21,6 +22,9 @@ pin_list = [
 
 def init():
     global pins
+    global font
+
+    font = Font(1, 300, 300)
 
     server.round = Round()
 
@@ -58,9 +62,11 @@ def update():
     pass
 
 def draw():
+    global font
     clear_canvas()
     game_world.render()
     server.round.draw()
+    font.draw()
     update_canvas()
     pass
 

@@ -184,11 +184,11 @@ class Pin():
 
             # Standing exit
             self.state_machine.cur_state.exit(self)
-            if server.round.who_turn == 'player':
-                if not server.round.cur_round in server.round.player_score:
-                server.round.player_score[server.round.cur_round] += 1
-            else:
-                server.round.npc_score[server.round.cur_round] += 1
+            # if server.round.who_turn == 'player':
+            #     if not server.round.cur_round in server.round.player_score:
+            #     server.round.player_score[server.round.cur_round] += 1
+            # else:
+            #     server.round.npc_score[server.round.cur_round] += 1
 
 
 
