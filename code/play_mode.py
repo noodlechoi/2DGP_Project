@@ -10,7 +10,6 @@ import title_mode
 import server
 from round import Round
 from npc import NPC, Knuckles
-from font import Font
 
 first_pin = [450, 480]
 pin_list = [
@@ -22,9 +21,6 @@ pin_list = [
 
 def init():
     global pins
-    global font
-
-    font = Font(1, 300, 300)
 
     server.round = Round()
 
@@ -37,10 +33,10 @@ def init():
     game_world.add_objects(pins, 1)
 
     server.npc = Knuckles()
-    game_world.add_object(server.npc, 2)
+    game_world.add_object(server.npc, 6)
 
     server.player = Sonic()
-    game_world.add_object(server.player, 2)
+    game_world.add_object(server.player, 6)
 
     game_world.add_collision_pair('ball:pin', server.player, None)
     game_world.add_collision_pair('ball:pin', server.npc, None)
@@ -62,11 +58,9 @@ def update():
     pass
 
 def draw():
-    global font
     clear_canvas()
     game_world.render()
     server.round.draw()
-    font.draw()
     update_canvas()
     pass
 

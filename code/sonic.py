@@ -324,6 +324,7 @@ class Sonic():
         self.size = [100, 150]
         self.dir = [0, 0]
         self.frame = 0
+        self.layer = 6
         self.state_machine = StateMachine(self)
         self.state_machine.start()
         if Sonic.img == None:

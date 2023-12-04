@@ -264,6 +264,7 @@ class NPC():
         self.frame = 0
         self.padding = 0
         self.coin = 10
+        self.layer = 6
         self.target_degree = 0
         self.state_machine = StateMachine(self)
         self.build_behavior_tree()
