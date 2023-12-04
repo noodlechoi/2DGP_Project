@@ -221,8 +221,8 @@ class Standing:
 
     @staticmethod
     def do(ball):
-        if (get_time() - ball.wait_time > 1):
-            ball.state_machine.cur_state.exit(ball)
+        # if (get_time() - ball.wait_time > 1):
+        #     ball.state_machine.cur_state.exit(ball)
 
         ball.frame = (ball.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
         # ball.frame = 9
@@ -468,5 +468,58 @@ class Knuckles(NPC):
 
         c3 = Condition('now my turn?', self.is_my_turn)
         root = Sequence('turn progress', c3, SEL_SKILL_THROW)
+
+        self.bt = BehaviorTree(root)
+
+class Tails(NPC):
+    def __init__(self):
+        super().__init__()
+
+        if NPC.img == None:
+            NPC.img = load_image('../resource/tails_sprite_sheet.png')
+
+    def draw(self):
+        super().draw()
+
+    def update(self):
+        super().update()
+
+    def get_bb(self):
+        return super().get_bb()
+
+    def handle_collision(self, group, other):
+        super().handle_collision(group, other)
+
+    def enter_init(self):
+        global FRAMES_PER_ACTION
+        if self.state_machine.cur_state == Standing:
+            FRAMES_PER_ACTION = 7
+            self.size = [100, 150]
+            self.frame = 0
+            self.real_size = [50, 42]
+            self.location = [20, 300]
+            self.padding = 0
+    def frame_cal(self):
+        self.frame = 0
+        pass
+
+    def build_behavior_tree(self):
+        # 스킬 사용
+        c1 = Condition('Did coin remain?', self.is_remain_coin)
+        a1 = Action('use skill', self.use_skill)
+        SEQ_SKILL = Sequence('use skill', c1, a1)
+
+        # # 발사
+        # c2 = Condition('Did turn remain?', self.is_remained_turn)
+        # a2 = Action('set range', self.set_range, 80, 90)
+        # a3 = Action('throw', self.throw)
+        # SEQ_THROW = Sequence('throw', c2, a2, a3)
+        #
+        # # 스킬/반사
+        # SEL_SKILL_THROW = Selector('skill or throw', SEQ_SKILL, SEQ_THROW)
+        #
+        # c3 = Condition('now my turn?', self.is_my_turn)
+        # root = Sequence('turn progress', c3, SEL_SKILL_THROW)
+        root = SEQ_SKILL
 
         self.bt = BehaviorTree(root)

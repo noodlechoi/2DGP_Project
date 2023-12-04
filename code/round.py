@@ -232,8 +232,6 @@ class Round:
 
 
     def draw(self):
-
-
         self.state_machine.draw()
 
     def turn_change(self):

@@ -9,7 +9,7 @@ from sonic import Sonic
 import title_mode
 import server
 from round import Round
-from npc import NPC, Knuckles
+from npc import NPC, Knuckles, Tails
 
 first_pin = [450, 480]
 pin_list = [
@@ -48,6 +48,7 @@ def init():
 
 def finish():
     game_world.clear()
+    server.clear()
     pass
 
 def update():
