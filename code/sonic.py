@@ -332,7 +332,7 @@ class Sonic():
         self.dir = [0, 0]
         self.frame = 0
         self.layer = 6
-        self.coin = 10
+        self.coin = 30
         self.state_machine = StateMachine(self)
         self.state_machine.start()
         self.skill = skill.Skill(self)
@@ -361,7 +361,6 @@ class Sonic():
             elif self.y >= play_mode.layer_place[5] - 80 // 2:
                 self.layer = 5
             print(self.coin)
-
 
 
 

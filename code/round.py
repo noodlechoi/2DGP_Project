@@ -245,6 +245,9 @@ class Round:
                         self.is_spare = True
                         self.wait_time = get_time()
 
+        print(self.turn)
+        print(self.who_turn)
+
 
 
 
@@ -253,7 +256,6 @@ class Round:
 
         if self.is_strike:
             img = load_image('../resource/bowling_sprite_sheet(1).png')
-            # img.clip_draw(0, 0, 150, 50, 300, 300, 100, 100)
             img.clip_draw(0, 50, 150, 70, game_world.WIDTH // 2, game_world.HEIGHT // 2, 300, 200)
             if get_time() - self.wait_time > 1:
                 self.is_strike = False
@@ -326,6 +328,13 @@ class Round:
     def reproduce_pins(self):
         if self.is_all_thrown():
             self.refill_pins()
+
+    def make_all_thrown(self):
+        for ol in game_world.objects:
+            for o in ol:
+                if Pin.__name__ == type(o).__name__:
+                    o.handle_collision('ball:pin', server.player)
+
 
     def change_pins(self):
         # 핀이 있는 모든 원소 지우기

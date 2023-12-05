@@ -5,26 +5,76 @@ def a_down(e, ball):
     if ball.coin < 5:
         return False
     else:
-        ball.coin -= 5
-        return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_a
+        if e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_a:
+            ball.coin -= 5
+        return  e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_a
 
 def s_down(e, ball):
     if ball.coin < 10:
         return False
     else:
-        ball.coin -= 10
+        if e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_s:
+            ball.coin -= 10
         return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_s
 
 def d_down(e, ball):
+    print(ball.coin)
     if ball.coin < 20:
         return False
     else:
-        ball.coin -= 20
-        return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_s
+        if e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_d:
+            ball.coin -= 20
+        return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_d
 
 
 def dead_ball(e, ball):
     return e[0] == 'Dead'
+
+
+class UpScore:
+    @staticmethod
+    def enter(ball, e):
+        server.round.make_all_thrown()
+        ball.wait_time = get_time()
+        pass
+
+    @staticmethod
+    def exit(ball, e):
+        server.round.turn_change()
+        pass
+
+    @staticmethod
+    def do(ball):
+        if server.is_dead:
+            ball.skill.handle_event( ('Dead', 0))
+
+        if get_time() - ball.wait_time > 2:
+            ball.skill.handle_event(('Dead', 0))
+        pass
+
+    @staticmethod
+    def draw(ball):
+        pass
+
+class Invin:
+    @staticmethod
+    def enter(ball, e):
+        pass
+
+    @staticmethod
+    def exit(ball, e):
+        pass
+
+    @staticmethod
+    def do(ball):
+        if server.is_dead:
+            ball.skill.handle_event( ('Dead', 0))
+
+        pass
+
+    @staticmethod
+    def draw(ball):
+        pass
 
 class Upsize:
     @staticmethod
@@ -70,8 +120,10 @@ class Skill():
         self.ball = ball
         self.cur_skill = No_skill
         self.transitions = {
-            No_skill: {a_down:Upsize},
-            Upsize: {dead_ball:No_skill}
+            No_skill: {a_down:Upsize, s_down:Invin, d_down:UpScore},
+            Upsize: {dead_ball:No_skill},
+            Invin: {dead_ball:No_skill},
+            UpScore: {dead_ball: No_skill},
         }
 
 
