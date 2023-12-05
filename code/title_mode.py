@@ -1,4 +1,4 @@
-from pico2d import load_image, clear_canvas, update_canvas, get_events, get_time
+from pico2d import *
 from sdl2 import SDL_QUIT, SDL_KEYDOWN, SDLK_ESCAPE, SDL_MOUSEBUTTONDOWN, SDL_BUTTON_LEFT
 
 import game_framework
@@ -28,6 +28,10 @@ def init():
     global rail
     global x, y, padding
     global frame
+    global bgm
+    bgm = load_music('../resource/football.mp3')
+    bgm.set_volume(32)
+    bgm.repeat_play()
 
     # 타이틀 소닉의 애니메이션을 위한 x축 패딩값
     padding = 0
@@ -52,6 +56,7 @@ def finish():
     # del location
 
 def update():
+    global bgm
     pass
 
 def draw():

@@ -23,6 +23,7 @@ def update():
 def draw():
     global lose_img
     lose_img.draw(game_world.WIDTH // 2, game_world.HEIGHT // 2, get_canvas_width(), get_canvas_height())
+    update_canvas()
     pass
 
 def handle_events():

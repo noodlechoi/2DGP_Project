@@ -5,7 +5,7 @@ from sdl2 import SDL_QUIT, SDL_KEYDOWN, SDLK_ESCAPE, SDL_MOUSEBUTTONDOWN, SDL_BU
 
 import game_framework
 import game_world
-from rail import Rail
+from rail import Rail, RailBar
 from pin import Pin
 from sonic import Sonic
 import title_mode
@@ -27,8 +27,17 @@ layer_place = {2:450, 3:370, 4:300, 5:250}
 random_range = {2:[300, 600], 3:[300, 600], 4:[300, 600], 5:[300, 600]}
 def init():
     global pins
+    global bgm
+    global key_img, ring_img, font
+    font = load_font('../resource/ENCR10B.TTF', 20)
+    bgm = load_music('../resource/football.mp3')
+    bgm.set_volume(32)
+    bgm.repeat_play()
+    key_img = load_image('../resource/키.png')
+    ring_img =  load_image('../resource/ring.png')
 
-
+    rail_bar = RailBar()
+    game_world.add_object(rail_bar, 3)
 
     server.round = Round()
 
@@ -37,10 +46,7 @@ def init():
     server.npc_rail = Rail()
     game_world.add_object(server.npc_rail, 0)
 
-    pins = [Pin(pin_list[i][0], pin_list[i][1]) for i in range(10)]
-    game_world.add_objects(pins, 1)
-
-    server.npc = Bean()
+    server.npc = Knuckles()
     game_world.add_object(server.npc, 6)
 
     server.player = Sonic()
@@ -53,6 +59,9 @@ def init():
         game_world.add_collision_pair('ball:ring', None, ring)
     game_world.add_collision_pair('ball:ring', server.player, None)
     game_world.add_collision_pair('ball:ring', server.npc, None)
+
+    pins = [Pin(pin_list[i][0], pin_list[i][1]) for i in range(10)]
+    game_world.add_objects(pins, 1)
 
     game_world.add_collision_pair('ball:pin', server.player, None)
     game_world.add_collision_pair('ball:pin', server.npc, None)
@@ -68,20 +77,23 @@ def finish():
     pass
 
 def update():
-    global bgm
-    bgm = load_music('../resource/football.mp3')
-    bgm.set_volume(32)
-    bgm.repeat_play()
     server.round.update()
-
     game_world.update()
     game_world.handle_collisions()
+    is_not_rail_bar()
     pass
 
 def draw():
+    global key_img, ring_img, font
     clear_canvas()
     game_world.render()
     server.round.draw()
+    key_img.draw(180, 800 - 30, 300, 100)
+    ring_img.clip_draw(0, 0, 17, 17, 30, 30, 50, 50)
+    if server.round.who_turn == 'player':
+        font.draw(60, 30, str(server.player.coin))
+    else:
+        font.draw(60, 30, str(server.npc.coin))
     update_canvas()
     pass
 
@@ -93,6 +105,8 @@ def handle_events():
             game_framework.quit()
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             game_framework.change_mode(title_mode)
+        elif event.type == SDL_KEYDOWN and event.key == SDLK_0:
+            server.round.cur_round = 10
         else:
             if server.round.who_turn == 'player' and server.round.is_processing():
                 server.player.handle_event(event)
@@ -107,3 +121,14 @@ def pause():
 
 def resume():
     pass
+
+def is_not_rail_bar():
+    global rail_bar
+    is_exit = False
+    for layer in game_world.objects:
+        for o in layer:
+            if type(o).__name__ == RailBar.__name__:
+                is_exit = True
+    if not is_exit:
+        rail_bar = RailBar()
+        game_world.add_object(rail_bar, 3)

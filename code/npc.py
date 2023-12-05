@@ -113,6 +113,7 @@ class Throw:
             return
 
         ball.frame = (ball.frame + FRAMES_PER_ACTION * 4 * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
+        ball.frame_cal()
 
     @staticmethod
     def draw(ball):
@@ -506,8 +507,7 @@ class Tails(NPC):
     def __init__(self):
         super().__init__()
 
-        if NPC.img == None:
-            NPC.img = load_image('../resource/tails_sprite_sheet(1).png')
+        NPC.img = load_image('../resource/tails_sprite_sheet(1).png')
 
     def draw(self):
         super().draw()
@@ -612,6 +612,7 @@ class Tails(NPC):
                     self.real_size = [25, 25]
                     self.padding = 0
                     self.size = [100, 150]
+                    self.location = [13, 140]
                 case 1:
                     self.padding = 5
                     pass
@@ -645,8 +646,7 @@ class Bean(NPC):
     def __init__(self):
         super().__init__()
 
-        if NPC.img == None:
-            NPC.img = load_image('../resource/bean_sprite_sheet(1).png')
+        NPC.img = load_image('../resource/bean_sprite_sheet(1).png')
 
     def draw(self):
         super().draw()

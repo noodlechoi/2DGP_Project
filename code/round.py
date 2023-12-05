@@ -81,26 +81,32 @@ class Next:
         global fonts
 
         round.cur_round += 1
-        if(round.cur_round % 10 == 1):
+        if(round.cur_round == 11):
             if type(server.npc).__name__ == Knuckles.__name__:
                 game_world.remove_object(server.npc)
                 server.npc = Tails()
+                game_world.add_object(server.npc, 6)
             elif type(server.npc).__name__ == Tails.__name__:
                 game_world.remove_object(server.npc)
                 server.npc = Bean()
-            else:
+                game_world.add_object(server.npc, 6)
+            elif type(server.npc).__name__ == Bean.__name__:
                 server.is_end = True
                 if round.is_player_win() > 0:
-                    game_framework.change_mode(title_mode)
+                    game_framework.change_mode(win_mode)
+                    return
 
             if round.is_player_win() < 0:
-                game_framework.change_mode(title_mode)
+                game_framework.change_mode(lose_mode)
+                return
 
-            game_world.add_object(server.npc, 6)
             game_world.add_collision_pair('ball:ring', server.npc, None)
             game_world.add_collision_pair('ball:pin', server.npc, None)
             round.player_score = dict()
             round.npc_score = dict()
+            round.cur_round = 1
+            round.turn = 2
+
             round.is_last = False
         if(round.cur_round == 10):
             round.is_last = True
@@ -248,7 +254,7 @@ class Round:
 
         # 마지막 차례에 스페어나 스트라이크가 아니면 기회 X
         if self.cur_round == 10:
-            if self.turn == 1:
+            if self.turn == 0:
                 if not self.is_all_thrown():
                     self.turn_change()
 

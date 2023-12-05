@@ -36,6 +36,7 @@ class UpScore:
     def enter(ball, e):
         server.round.make_all_thrown()
         ball.wait_time = get_time()
+        Skill.sound.play()
         pass
 
     @staticmethod
@@ -60,6 +61,7 @@ class Invin:
     @staticmethod
     def enter(ball, e):
         server.is_invin = True
+        Skill.sound.play()
         pass
 
     @staticmethod
@@ -82,6 +84,7 @@ class Upsize:
     @staticmethod
     def enter(ball, e):
         ball.size = [200, 200]
+        Skill.sound.play()
         pass
 
     @staticmethod
@@ -118,6 +121,7 @@ class No_skill:
         pass
 
 class Skill():
+    sound = None
     def __init__(self, ball):
         self.ball = ball
         self.cur_skill = No_skill
@@ -127,6 +131,8 @@ class Skill():
             Invin: {dead_ball:No_skill},
             UpScore: {dead_ball: No_skill},
         }
+        if Skill.sound == None:
+            Skill.sound = load_music('../resource/pickup.wav')
 
 
     def start(self):

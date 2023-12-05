@@ -16,6 +16,7 @@ FRAMES_PER_ACTION = 4
 
 class Ring():
     img = None
+    eat_sound = None
     def __init__(self, layer, x, y):
         self.layer = layer
         self.x, self.y = x, y
@@ -24,6 +25,8 @@ class Ring():
         self.size = [[100,80], [50, 80], [30, 80],[50, 80]]
         if Ring.img == None:
             Ring.img = load_image('../resource/ring.png')
+        if Ring.eat_sound == None:
+            Ring.eat_sound = load_music('../resource/마리오 동전.wav')
 
 
     def update(self):
@@ -44,4 +47,5 @@ class Ring():
             if other.layer == self.layer:
                 other.coin += 1
                 game_world.remove_object(self)
+                Ring.eat_sound.play()
             pass

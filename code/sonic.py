@@ -190,6 +190,8 @@ class Rolling:
     def do(ball):
         ball.frame = (ball.frame + FRAMES_PER_ACTION * 4 * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
 
+        Sonic.rolling_sound.play()
+
     @staticmethod
     def draw(ball):
         if ball.dir[0] <= 0:
@@ -343,6 +345,7 @@ class StateMachine:
 
 class Sonic():
     img = None
+    rolling_sound = None
     # invin_img = None
     def __init__(self):
         self.x = 450
@@ -353,15 +356,15 @@ class Sonic():
         self.dir = [0, 0]
         self.frame = 0
         self.layer = 6
-        self.coin = 0
+        self.coin = 30
         self.state_machine = StateMachine(self)
         self.state_machine.start()
         self.skill = skill.Skill(self)
         self.skill.start()
         if Sonic.img == None:
             Sonic.img = load_image('../resource/sonic_sprite_sheet(1).png')
-        # if Sonic.invin_img == None:
-        #     Sonic.img = load_image('../resource/invincibility_skill.png')
+        if Sonic.rolling_sound == None:
+            Sonic.rolling_sound = load_music('../resource/볼링_굴러가는.wav')
 
     def draw(self):
         if server.round.who_turn == 'player':
@@ -383,7 +386,7 @@ class Sonic():
                 self.layer = 4
             elif self.y >= play_mode.layer_place[5] - 80 // 2:
                 self.layer = 5
-            print(self.coin)
+            # print(self.coin)
 
 
 

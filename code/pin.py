@@ -149,6 +149,7 @@ class StateMachine:
 
 class Pin():
     img = None
+    thrown_sound = None
     def __init__(self, x = 450, y = 500):
         self.x = x
         self.y = y
@@ -162,6 +163,8 @@ class Pin():
         self.size = [50, 100]
         if Pin.img == None:
             Pin.img = load_image('../resource/pin.png')
+        if Pin.thrown_sound == None:
+            Pin.thrown_sound = load_music('../resource/볼링.wav')
 
     def draw(self):
         self.state_machine.draw()
@@ -198,5 +201,7 @@ class Pin():
                     server.round.npc_score[server.round.cur_round][server.round.turn] = 0
 
                 server.round.npc_score[server.round.cur_round][server.round.turn] += 1
+
+            Pin.thrown_sound.play()
 
 
