@@ -2,6 +2,7 @@ from pico2d import *
 
 import game_framework
 import game_world
+import play_mode
 from arrow import Arrow
 import math
 import server
@@ -325,6 +326,7 @@ class Sonic():
         self.dir = [0, 0]
         self.frame = 0
         self.layer = 6
+        self.coin = 0
         self.state_machine = StateMachine(self)
         self.state_machine.start()
         if Sonic.img == None:
@@ -339,6 +341,17 @@ class Sonic():
         if server.round.who_turn == 'player':
             self.state_machine.update()
 
+            # 갈수록 레이어가 바뀜
+            if self.y >= play_mode.layer_place[2]:
+                self.layer = 2
+            elif self.y >= play_mode.layer_place[3]:
+                self.layer = 3
+            elif self.y >= play_mode.layer_place[4]:
+                self.layer = 4
+            elif self.y >= play_mode.layer_place[5]:
+                self.layer = 5
+            # print(self.layer)
+
     def handle_event(self, event):
         self.state_machine.handle_event(('INPUT', event))
 
@@ -348,7 +361,8 @@ class Sonic():
     def handle_collision(self, group, other):
         if group == 'ball:pin':
             pass
-
+        if group == 'ball:ring':
+            pass
 
     def move_dead_line(self, t):
         # 오른쪽 레일로 갈 때

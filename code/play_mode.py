@@ -1,3 +1,5 @@
+import random
+
 from pico2d import clear_canvas, update_canvas, get_events
 from sdl2 import SDL_QUIT, SDL_KEYDOWN, SDLK_ESCAPE, SDL_MOUSEBUTTONDOWN, SDL_BUTTON_LEFT, SDL_MOUSEMOTION
 
@@ -10,6 +12,7 @@ import title_mode
 import server
 from round import Round
 from npc import NPC, Knuckles, Tails
+from ring import Ring
 
 first_pin = [450, 480]
 pin_list = [
@@ -18,9 +21,12 @@ pin_list = [
     [first_pin[0] - 30 , first_pin[1] + 25], [first_pin[0] + 30, first_pin[1] + 25],
     [first_pin[0], first_pin[1]]
 ]
-
+layer_place = {2:450, 3:370, 4:300, 5:250}
+random_range = {2:[300, 600], 3:[300, 600], 4:[300, 600], 5:[300, 600]}
 def init():
     global pins
+
+
 
     server.round = Round()
 
@@ -37,6 +43,14 @@ def init():
 
     server.player = Sonic()
     game_world.add_object(server.player, 6)
+
+
+    for i in range(4):
+        ring = Ring(i, random.randint(random_range[i+2][0], random_range[i+2][1]), layer_place[i+2])
+        game_world.add_object(ring, i+2)
+        game_world.add_collision_pair('ball:ring', None, ring)
+    game_world.add_collision_pair('ball:ring', server.player, None)
+    game_world.add_collision_pair('ball:ring', server.npc, None)
 
     game_world.add_collision_pair('ball:pin', server.player, None)
     game_world.add_collision_pair('ball:pin', server.npc, None)
