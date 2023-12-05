@@ -60,6 +60,7 @@ class Dead:
         ball.state_machine.cur_state = Standing
         ball.state_machine.start()
         game_world.add_collision_pair('ball:pin', ball, None)
+        game_world.add_collision_pair('ball:ring', ball, None)
 
         ball.layer = 6
 
