@@ -87,6 +87,7 @@ class Next:
         fonts = []
         player_first_score = [[35, 445], [60, 463], [95, 463]]
         next_round = 85
+        # {0:{2:10, 1:10}}
         for r, s in round.player_score.items():
             for turn in s.keys():
                 if round.is_last:
@@ -211,6 +212,7 @@ class Round:
         self.is_last = False
         self.player_score = dict()
         self.npc_score = dict()
+        self.is_strike, self.is_spare = False, False
         self.state_machine = StateMachine(self)
         self.state_machine.start()
         if Round.score_img == None:
@@ -226,13 +228,45 @@ class Round:
                 if not self.is_all_thrown():
                     self.turn_change()
 
-        # strike면 다음 턴
-        if self.is_all_thrown():
-            self.turn_change()
+        if self.who_turn == 'player':
+            score = self.player_score
+        else:
+            score = self.npc_score
+        if self.cur_round in score.keys():
+            if self.turn in score[self.cur_round].keys():
+                # strike면 다음 턴
+                if score[self.cur_round][self.turn] == 10:
+                    self.is_strike = True
+                    self.wait_time = get_time()
+                    self.turn -= 1
+                # spare
+                elif self.turn < 2 or (self.is_last and self.turn < 3):
+                    if score[self.cur_round][self.turn] + score[self.cur_round][self.turn + 1] == 10:
+                        self.is_spare = True
+                        self.wait_time = get_time()
+                        self.turn -= 1
+
+
 
 
     def draw(self):
         self.state_machine.draw()
+
+        if self.is_strike:
+            img = load_image('../resource/bowling_sprite_sheet(1).png')
+            # img.clip_draw(0, 0, 150, 50, 300, 300, 100, 100)
+            img.clip_draw(0, 50, 150, 70, game_world.WIDTH // 2, game_world.HEIGHT // 2, 300, 200)
+            if get_time() - self.wait_time > 1:
+                self.is_strike = False
+
+        if self.is_spare:
+            img = load_image('../resource/bowling_sprite_sheet(1).png')
+            img.clip_draw(0, 0, 150, 50, game_world.WIDTH // 2, game_world.HEIGHT // 2, 300, 200)
+            if get_time() - self.wait_time > 1:
+                self.is_spare = False
+
+
+
 
     def turn_change(self):
         if not self.is_last:

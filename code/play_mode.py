@@ -1,6 +1,6 @@
 import random
 
-from pico2d import clear_canvas, update_canvas, get_events
+from pico2d import clear_canvas, update_canvas, get_events, load_image
 from sdl2 import SDL_QUIT, SDL_KEYDOWN, SDLK_ESCAPE, SDL_MOUSEBUTTONDOWN, SDL_BUTTON_LEFT, SDL_MOUSEMOTION
 
 import game_framework
@@ -46,7 +46,7 @@ def init():
 
 
     for i in range(4):
-        ring = Ring(i, random.randint(random_range[i+2][0], random_range[i+2][1]), layer_place[i+2])
+        ring = Ring(i+2, random.randint(random_range[i+2][0], random_range[i+2][1]), layer_place[i+2])
         game_world.add_object(ring, i+2)
         game_world.add_collision_pair('ball:ring', None, ring)
     game_world.add_collision_pair('ball:ring', server.player, None)

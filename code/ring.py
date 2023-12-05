@@ -21,7 +21,7 @@ class Ring():
         self.x, self.y = x, y
         self.frame = 0
         self.ring_frame = {0:{'loc':[0,0], 'size':[17,17]}, 1:{'loc':[17,0], 'size':[10,17]}, 2:{'loc':[27,0], 'size':[6,17]}, 3:{'loc':[33,0], 'size':[12,17]}}
-        self.size = [[100,100], [50, 100], [30, 100],[50, 100]]
+        self.size = [[100,80], [50, 80], [30, 80],[50, 80]]
         if Ring.img == None:
             Ring.img = load_image('../resource/ring.png')
 
@@ -41,7 +41,6 @@ class Ring():
 
     def handle_collision(self, group, other):
         if group == 'ball:ring':
-            print(self.layer)
             if other.layer == self.layer:
                 other.coin += 1
                 game_world.remove_object(self)

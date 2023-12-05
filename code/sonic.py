@@ -59,6 +59,8 @@ class Dead:
         ball.state_machine.start()
         game_world.add_collision_pair('ball:pin', ball, None)
 
+        ball.layer = 6
+
         # 다음 캐릭터 순서로 넘어감
         server.round.turn -= 1
         if server.round.turn <= 0:
@@ -342,15 +344,18 @@ class Sonic():
             self.state_machine.update()
 
             # 갈수록 레이어가 바뀜
-            if self.y >= play_mode.layer_place[2]:
+            if self.y >= play_mode.layer_place[2] - 80 // 2:
                 self.layer = 2
-            elif self.y >= play_mode.layer_place[3]:
+            elif self.y >= play_mode.layer_place[3] - 80 // 2:
                 self.layer = 3
-            elif self.y >= play_mode.layer_place[4]:
+            elif self.y >= play_mode.layer_place[4] - 80 // 2:
                 self.layer = 4
-            elif self.y >= play_mode.layer_place[5]:
+            elif self.y >= play_mode.layer_place[5] - 80 // 2:
                 self.layer = 5
-            # print(self.layer)
+            print(self.coin)
+
+
+
 
     def handle_event(self, event):
         self.state_machine.handle_event(('INPUT', event))

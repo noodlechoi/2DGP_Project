@@ -6,6 +6,7 @@ import game_world
 from arrow import Arrow
 from behavior_tree import BehaviorTree, Action, Sequence, Condition, Selector
 import server
+import play_mode
 
 PIXEL_PER_METER = (10.0 / 0.3)  # 10 pixel 30 cm
 RUN_SPEED_KMPH = 1.0  # Km / Hour
@@ -279,6 +280,16 @@ class NPC():
         if server.round.who_turn == 'npc':
             self.bt.run()
             self.state_machine.update()
+
+            # 갈수록 레이어가 바뀜
+            if self.y >= play_mode.layer_place[2] - 80 // 2:
+                self.layer = 2
+            elif self.y >= play_mode.layer_place[3] - 80 // 2:
+                self.layer = 3
+            elif self.y >= play_mode.layer_place[4] - 80 // 2:
+                self.layer = 4
+            elif self.y >= play_mode.layer_place[5] - 80 // 2:
+                self.layer = 5
 
     def get_bb(self):
         return self.x - self.size[0] // 2 + 10, self.y - self.size[1] // 2 + 10, self.x + self.size[
