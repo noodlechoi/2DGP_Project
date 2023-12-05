@@ -1,11 +1,17 @@
 import play_mode
 import game_world
+import random
+
+import title_mode
 from pin import Pin
 from pico2d import *
 import game_framework
 import server
 from font import Font
-
+from npc import Knuckles, Tails, Bean
+import lose_mode
+import win_mode
+from ring import Ring
 
 PIXEL_PER_METER = (10.0 / 0.3)
 DROP_SPEED_KMPH = 1.0
@@ -75,7 +81,24 @@ class Next:
         global fonts
 
         round.cur_round += 1
-        if(round.cur_round == 1):
+        if(round.cur_round % 10 == 1):
+            if type(server.npc).__name__ == Knuckles.__name__:
+                game_world.remove_object(server.npc)
+                server.npc = Tails()
+            elif type(server.npc).__name__ == Tails.__name__:
+                game_world.remove_object(server.npc)
+                server.npc = Bean()
+            else:
+                server.is_end = True
+                if round.is_player_win() > 0:
+                    game_framework.change_mode(title_mode)
+
+            if round.is_player_win() < 0:
+                game_framework.change_mode(title_mode)
+
+            game_world.add_object(server.npc, 6)
+            game_world.add_collision_pair('ball:ring', server.npc, None)
+            game_world.add_collision_pair('ball:pin', server.npc, None)
             round.player_score = dict()
             round.npc_score = dict()
             round.is_last = False
@@ -222,6 +245,7 @@ class Round:
     def update(self):
         self.state_machine.update()
 
+
         # 마지막 차례에 스페어나 스트라이크가 아니면 기회 X
         if self.cur_round == 10:
             if self.turn == 1:
@@ -277,8 +301,9 @@ class Round:
         self.state_machine.start()
         self.change_pins()
 
-
         if self.who_turn == 'player':
+            if not server.is_start:
+                server.is_start = True
             self.who_turn = 'npc'
         else:
             self.who_turn = 'player'
@@ -341,16 +366,31 @@ class Round:
             for o in ol:
                 if Pin.__name__ == type(o).__name__:
                     ol.clear()
+                elif Ring.__name__ == type(o).__name__:
+                    ol.clear()
 
         for pairs in game_world.collision_pairs.values():
             for o in pairs[0]:
                 if Pin.__name__ in type(o).__name__:
                     pairs[0].clear()
+                elif Ring.__name__ == type(o).__name__:
+                    pairs[1].clear()
             for o in pairs[1]:
                 if Pin.__name__ in type(o).__name__:
                     pairs[1].clear()
+                elif Ring.__name__ == type(o).__name__:
+                    pairs[1].clear()
 
         self.refill_pins()
+        self.refill_rings()
+
+    def refill_rings(self):
+        for i in range(4):
+            ring = Ring(i + 2, random.randint(play_mode.random_range[i + 2][0], play_mode.random_range[i + 2][1]), play_mode.layer_place[i + 2])
+            game_world.add_object(ring, i + 2)
+            game_world.add_collision_pair('ball:ring', None, ring)
+        game_world.add_collision_pair('ball:ring', server.player, None)
+        game_world.add_collision_pair('ball:ring', server.npc, None)
 
     def refill_pins(self):
         pins = [Pin(play_mode.pin_list[i][0], play_mode.pin_list[i][1]) for i in range(10)]
@@ -359,3 +399,15 @@ class Round:
             game_world.add_collision_pair('ball:pin', None, pin)
 
         self.ready()
+
+    def is_player_win(self):
+        player_sum = 0
+        npc_sum = 0
+        for r, s in self.player_score.items():
+            for turn in s.keys():
+                player_sum += s[turn]
+        for r, s in self.npc_score.items():
+            for turn in s.keys():
+                npc_sum += s[turn]
+
+        return  player_sum - npc_sum

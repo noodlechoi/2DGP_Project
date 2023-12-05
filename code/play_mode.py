@@ -1,6 +1,6 @@
 import random
 
-from pico2d import clear_canvas, update_canvas, get_events, load_image
+from pico2d import *
 from sdl2 import SDL_QUIT, SDL_KEYDOWN, SDLK_ESCAPE, SDL_MOUSEBUTTONDOWN, SDL_BUTTON_LEFT, SDL_MOUSEMOTION
 
 import game_framework
@@ -11,8 +11,10 @@ from sonic import Sonic
 import title_mode
 import server
 from round import Round
-from npc import NPC, Knuckles, Tails
+from npc import NPC, Knuckles, Tails, Bean
 from ring import Ring
+import win_mode
+import lose_mode
 
 first_pin = [450, 480]
 pin_list = [
@@ -38,7 +40,7 @@ def init():
     pins = [Pin(pin_list[i][0], pin_list[i][1]) for i in range(10)]
     game_world.add_objects(pins, 1)
 
-    server.npc = Tails()
+    server.npc = Bean()
     game_world.add_object(server.npc, 6)
 
     server.player = Sonic()
@@ -66,6 +68,10 @@ def finish():
     pass
 
 def update():
+    global bgm
+    bgm = load_music('../resource/football.mp3')
+    bgm.set_volume(32)
+    bgm.repeat_play()
     server.round.update()
 
     game_world.update()

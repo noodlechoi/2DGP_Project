@@ -7,6 +7,7 @@ from arrow import Arrow
 from behavior_tree import BehaviorTree, Action, Sequence, Condition, Selector
 import server
 import play_mode
+import skill
 
 PIXEL_PER_METER = (10.0 / 0.3)  # 10 pixel 30 cm
 RUN_SPEED_KMPH = 1.0  # Km / Hour
@@ -271,7 +272,10 @@ class NPC():
         self.coin = 10
         self.layer = 6
         self.target_degree = 0
+        self.skill = skill.Skill(self)
+        self.skill.start()
         self.state_machine = StateMachine(self)
+        # self.state_machine.start()
         self.build_behavior_tree()
 
 
@@ -282,6 +286,9 @@ class NPC():
 
     def update(self):
         if server.round.who_turn == 'npc':
+            if server.is_start:
+                self.state_machine.start()
+                server.is_start = False
             self.bt.run()
             self.state_machine.update()
 
@@ -327,11 +334,11 @@ class NPC():
     def use_skill(self):
         if self.state_machine.cur_state == Standing:
             self.coin -= 10
+            return True
+        else:
+            return False
             # 스킬 사용
 
-            self.wait_time = get_time()
-            return BehaviorTree.SUCCESS
-        return BehaviorTree.FAIL
         pass
 
     def is_remained_turn(self):
@@ -374,6 +381,13 @@ class Knuckles(NPC):
 
     def handle_collision(self, group, other):
         super().handle_collision(group, other)
+
+    def use_skill(self):
+        if super().use_skill():
+
+            return BehaviorTree.SUCCESS
+        return BehaviorTree.FAIL
+        pass
 
     def enter_init(self):
         global FRAMES_PER_ACTION
@@ -493,7 +507,7 @@ class Tails(NPC):
         super().__init__()
 
         if NPC.img == None:
-            NPC.img = load_image('../resource/tails_sprite_sheet.png')
+            NPC.img = load_image('../resource/tails_sprite_sheet(1).png')
 
     def draw(self):
         super().draw()
@@ -510,15 +524,100 @@ class Tails(NPC):
     def enter_init(self):
         global FRAMES_PER_ACTION
         if self.state_machine.cur_state == Standing:
+            FRAMES_PER_ACTION = 8
+            self.size = [100, 150]
+            self.frame = 0
+            self.real_size = [30, 30]
+            self.location = [6, 415]
+            self.padding = 0
+        if self.state_machine.cur_state == Run:
             FRAMES_PER_ACTION = 7
             self.size = [100, 150]
             self.frame = 0
-            self.real_size = [50, 42]
-            self.location = [20, 300]
+            self.real_size = [30, 30]
+            self.location = [6, 370]
+            self.padding = 0
+        if self.state_machine.cur_state == Rolling:
+            FRAMES_PER_ACTION = 3
+            self.size = [100, 150]
+            self.frame = 0
+            self.real_size = [25, 25]
+            self.location = [13, 140]
+            self.padding = 0
+        if self.state_machine.cur_state == Throw:
+            FRAMES_PER_ACTION = 3
+            self.size = [100, 150]
+            self.frame = 0
+            self.real_size = [25, 25]
+            self.location = [13, 140]
             self.padding = 0
     def frame_cal(self):
-        self.frame = 0
-        pass
+        if self.state_machine.cur_state == Standing:
+            match int(self.frame):
+                case 0:
+                    self.real_size = [30, 30]
+                    self.padding = 0
+                    self.size = [100, 150]
+                case 1:
+                    self.real_size = [30, 30]
+                    self.padding = 0
+                    self.size = [100, 150]
+                case 2:
+                    self.padding = 5
+                case 3:
+                    self.padding = 5
+                case 4:
+                    self.padding = 10
+                case 5:
+                    self.padding = 15
+                case 6:
+                    self.padding = 15
+                case 7:
+                    self.padding = 15
+        if self.state_machine.cur_state == Run:
+            match int(self.frame):
+                case 0:
+                    self.real_size = [30, 30]
+                    self.padding = 0
+                    self.size = [100, 150]
+                case 1:
+                    self.real_size = [30, 30]
+                    self.padding = 0
+                    self.size = [100, 150]
+                case 2:
+                    self.padding = 5
+                case 3:
+                    self.padding = 5
+                case 4:
+                    self.padding = 10
+                case 5:
+                    self.padding = 15
+                case 6:
+                    self.padding = 15
+        if self.state_machine.cur_state == Rolling:
+            match int(self.frame):
+                case 0:
+                    self.real_size = [25, 25]
+                    self.padding = 0
+                    self.size = [100, 150]
+                case 1:
+                    self.padding = 5
+                    pass
+                case 2:
+                    self.padding = 10
+                    pass
+        if self.state_machine.cur_state == Throw:
+            match int(self.frame):
+                case 0:
+                    self.real_size = [25, 25]
+                    self.padding = 0
+                    self.size = [100, 150]
+                case 1:
+                    self.padding = 5
+                    pass
+                case 2:
+                    self.padding = 10
+                    pass
 
     def build_behavior_tree(self):
         # 스킬 사용
@@ -526,17 +625,149 @@ class Tails(NPC):
         a1 = Action('use skill', self.use_skill)
         SEQ_SKILL = Sequence('use skill', c1, a1)
 
-        # # 발사
-        # c2 = Condition('Did turn remain?', self.is_remained_turn)
-        # a2 = Action('set range', self.set_range, 80, 90)
-        # a3 = Action('throw', self.throw)
-        # SEQ_THROW = Sequence('throw', c2, a2, a3)
-        #
-        # # 스킬/반사
-        # SEL_SKILL_THROW = Selector('skill or throw', SEQ_SKILL, SEQ_THROW)
-        #
-        # c3 = Condition('now my turn?', self.is_my_turn)
-        # root = Sequence('turn progress', c3, SEL_SKILL_THROW)
-        root = SEQ_SKILL
+        # 발사
+        c2 = Condition('Did turn remain?', self.is_remained_turn)
+        a2 = Action('set range', self.set_range, 80, 90)
+        a3 = Action('throw', self.throw)
+        SEQ_THROW = Sequence('throw', c2, a2, a3)
+
+        # 스킬/반사
+        SEL_SKILL_THROW = Selector('skill or throw', SEQ_SKILL, SEQ_THROW)
+
+        c3 = Condition('now my turn?', self.is_my_turn)
+        root = Sequence('turn progress', c3, SEL_SKILL_THROW)
+        # root = SEQ_SKILL
+
+        self.bt = BehaviorTree(root)
+
+
+class Bean(NPC):
+    def __init__(self):
+        super().__init__()
+
+        if NPC.img == None:
+            NPC.img = load_image('../resource/bean_sprite_sheet(1).png')
+
+    def draw(self):
+        super().draw()
+
+    def update(self):
+        super().update()
+
+    def get_bb(self):
+        return super().get_bb()
+
+    def handle_collision(self, group, other):
+        super().handle_collision(group, other)
+
+    def enter_init(self):
+        global FRAMES_PER_ACTION
+        if self.state_machine.cur_state == Standing:
+            FRAMES_PER_ACTION = 3
+            self.size = [100, 150]
+            self.frame = 0
+            self.real_size = [23, 36]
+            self.location = [6, 185]
+            self.padding = 0
+        if self.state_machine.cur_state == Run:
+            FRAMES_PER_ACTION = 6
+            self.size = [100, 150]
+            self.frame = 0
+            self.real_size = [27, 36]
+            self.location = [0, 140]
+            self.padding = 0
+        if self.state_machine.cur_state == Rolling:
+            FRAMES_PER_ACTION = 4
+            self.size = [100, 150]
+            self.frame = 0
+            self.real_size = [27, 27]
+            self.location = [312, 185]
+            self.padding = 0
+        if self.state_machine.cur_state == Throw:
+            FRAMES_PER_ACTION = 4
+            self.size = [100, 150]
+            self.frame = 0
+            self.real_size = [27, 27]
+            self.location = [312, 185]
+            self.padding = 0
+
+    def frame_cal(self):
+        # self.frame = 0
+        if self.state_machine.cur_state == Standing:
+            match int(self.frame):
+                case 0:
+                    self.real_size =  [23, 36]
+                    self.padding = 0
+                    self.size = [100, 150]
+                case 1:
+                    self.real_size = [23, 36]
+                    self.padding = 0
+                case 2:
+                    self.real_size = [23, 36]
+                    self.padding = 4
+        if self.state_machine.cur_state == Run:
+            match int(self.frame):
+                case 0:
+                    self.real_size =  [27, 36]
+                    self.padding = 0
+                    self.size = [100, 150]
+                case 1:
+                    self.real_size = [30, 36]
+                    self.padding = -1
+                case 2:
+                    self.real_size = [32, 36]
+                    self.padding = -2
+                case 3:
+                    self.real_size = [32, 36]
+                    self.padding = 2
+                case 4:
+                    self.real_size = [30, 36]
+                    self.padding = 10
+                case 5:
+                    self.real_size = [30, 36]
+                    self.padding = 10
+        if self.state_machine.cur_state == Rolling:
+            match int(self.frame):
+                case 0:
+                    self.real_size = [27, 27]
+                    self.padding = 0
+                    self.size = [100, 150]
+                case 1:
+                    self.padding = 1
+                case 2:
+                    self.padding = 3
+                case 3:
+                    self.padding = 2
+        if self.state_machine.cur_state == Throw:
+            match int(self.frame):
+                case 0:
+                    self.real_size = [27, 27]
+                    self.padding = 0
+                    self.size = [100, 150]
+                case 1:
+                    self.padding = 1
+                case 2:
+                    self.padding = 3
+                case 3:
+                    self.padding = 2
+
+    def build_behavior_tree(self):
+        # 스킬 사용
+        c1 = Condition('Did coin remain?', self.is_remain_coin)
+        a1 = Action('use skill', self.use_skill)
+        SEQ_SKILL = Sequence('use skill', c1, a1)
+
+        # 발사
+        c2 = Condition('Did turn remain?', self.is_remained_turn)
+        a2 = Action('set range', self.set_range, 80, 90)
+        a3 = Action('throw', self.throw)
+        SEQ_THROW = Sequence('throw', c2, a2, a3)
+
+        # 스킬/반사
+        SEL_SKILL_THROW = Selector('skill or throw', SEQ_SKILL, SEQ_THROW)
+
+        c3 = Condition('now my turn?', self.is_my_turn)
+        root = Sequence('turn progress', c3, SEL_SKILL_THROW)
+        # root = SEQ_SKILL
 
         self.bt = BehaviorTree(root)

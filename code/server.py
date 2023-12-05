@@ -5,6 +5,10 @@ round = None
 npc = None
 is_dead = False
 is_invin = False
+is_start = False
+is_end = False
+is_lose = False
+is_win = False
 
 def clear():
     player_rail = None
@@ -14,3 +18,7 @@ def clear():
     npc = None
     is_dead = False
     is_invin = False
+    is_start = False
+    is_end = False
+    is_lose = False
+    is_win = False
