@@ -259,7 +259,7 @@ class Standing:
         ball.y = 100
         ball.location = [42, 1625]
         ball.real_size = [30, 45]
-        # ball.size = [100, 150]
+        ball.size = [100, 150]
         server.is_dead = False
         pass
 
@@ -288,7 +288,7 @@ class StateMachine:
         self.sonic = sonic
         self.cur_state = Standing
         self.transitions = {
-            Standing : {mouse_left_down: Run, a_down: Standing},
+            Standing : {mouse_left_down: Run},
             Run : {time_out: Rolling, mouse_left_up : Thrown},
             Rolling : {mouse_left_up : Thrown},
             Thrown : {},
@@ -332,7 +332,7 @@ class Sonic():
         self.dir = [0, 0]
         self.frame = 0
         self.layer = 6
-        self.coin = 0
+        self.coin = 10
         self.state_machine = StateMachine(self)
         self.state_machine.start()
         self.skill = skill.Skill(self)

@@ -2,11 +2,26 @@ from pico2d import *
 import server
 
 def a_down(e, ball):
+    if ball.coin < 5:
+        return False
+    else:
+        ball.coin -= 5
+        return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_a
+
+def s_down(e, ball):
     if ball.coin < 10:
         return False
     else:
         ball.coin -= 10
-        return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_a
+        return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_s
+
+def d_down(e, ball):
+    if ball.coin < 20:
+        return False
+    else:
+        ball.coin -= 20
+        return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_s
+
 
 def dead_ball(e, ball):
     return e[0] == 'Dead'
