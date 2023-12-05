@@ -244,7 +244,6 @@ class Round:
                     if score[self.cur_round][self.turn] + score[self.cur_round][self.turn + 1] == 10:
                         self.is_spare = True
                         self.wait_time = get_time()
-                        self.turn -= 1
 
 
 

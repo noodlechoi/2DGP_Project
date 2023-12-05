@@ -6,6 +6,7 @@ import play_mode
 from arrow import Arrow
 import math
 import server
+import skill
 
 PIXEL_PER_METER = (10.0 / 0.3)
 RUN_SPEED_KMPH = 1.0
@@ -51,6 +52,7 @@ class Dead:
         ball.location = [605, 1210]
         game_world.remove_collision_object(ball)
 
+        server.is_dead = True
         pass
 
     @staticmethod
@@ -65,6 +67,7 @@ class Dead:
         server.round.turn -= 1
         if server.round.turn <= 0:
             server.round.turn_change()
+
         pass
 
     @staticmethod
@@ -256,7 +259,8 @@ class Standing:
         ball.y = 100
         ball.location = [42, 1625]
         ball.real_size = [30, 45]
-        ball.size = [100, 150]
+        # ball.size = [100, 150]
+        server.is_dead = False
         pass
 
     @staticmethod
@@ -331,17 +335,21 @@ class Sonic():
         self.coin = 0
         self.state_machine = StateMachine(self)
         self.state_machine.start()
+        self.skill = skill.Skill(self)
+        self.skill.start()
         if Sonic.img == None:
             Sonic.img = load_image('../resource/sonic_sprite_sheet(1).png')
 
     def draw(self):
         if server.round.who_turn == 'player':
             self.state_machine.draw()
+            self.skill.draw()
             draw_rectangle(*self.get_bb())
 
     def update(self):
         if server.round.who_turn == 'player':
             self.state_machine.update()
+            self.skill.update()
 
             # 갈수록 레이어가 바뀜
             if self.y >= play_mode.layer_place[2] - 80 // 2:
@@ -359,6 +367,8 @@ class Sonic():
 
     def handle_event(self, event):
         self.state_machine.handle_event(('INPUT', event))
+        self.skill.handle_event(('INPUT', event))
+
 
     def get_bb(self):
         return self.x - self.size[0] // 2 + 10, self.y - self.size[1] // 2+ 10, self.x + self.size[0] // 2 - 10, self.y + self.size[1] // 2 - 10

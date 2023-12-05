@@ -25,6 +25,7 @@ class Dead:
         global t
         t = 0
         game_world.remove_collision_object(ball)
+        server.is_dead = True
         pass
 
     @staticmethod
@@ -38,6 +39,7 @@ class Dead:
         server.round.turn -= 1
         if server.round.turn <= 0:
             server.round.turn_change()
+
         pass
 
     @staticmethod
@@ -212,6 +214,7 @@ class Standing:
         ball.y = 100
         ball.wait_time = get_time()
         ball.enter_init()
+        server.is_dead = False
         pass
 
     @staticmethod
