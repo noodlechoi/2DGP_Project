@@ -133,9 +133,17 @@ class Thrown:
         ball.size[0] -= int(14 * RUN_SPEED_PPS * game_framework.frame_time)
         ball.size[1] -= int(14 * RUN_SPEED_PPS * game_framework.frame_time)
 
-        
+        if server.is_invin:
+            if server.player_rail.dead_line(ball):
+                ball.dir[0] *= -1
+
+        else:
+            if server.player_rail.dead_line(ball):
+                ball.state_machine.cur_state = Dead
+                ball.state_machine.start()
+
         # rail 밖으로 나갔을 때
-        if server.player_rail.dead_line(ball) or (ball.x <= 0 - ball.size[0] // 2 + 10 or ball.x >= game_world.WIDTH + ball.size[0] // 2 or ball.y >= 530):
+        if  (ball.x <= 0 - ball.size[0] // 2 + 10 or ball.x >= game_world.WIDTH + ball.size[0] // 2 or ball.y >= 530):
             ball.state_machine.cur_state = Dead
             ball.state_machine.start()
             return
@@ -281,6 +289,17 @@ class Standing:
             Sonic.img.clip_composite_draw(ball.location[0] + ball.real_size[0] * int(ball.frame), ball.location[1],
                                             ball.real_size[0], ball.real_size[1], 0, 'h', ball.x, ball.y,
                                             ball.size[0], ball.size[1])
+        #
+        # if server.is_invin:
+        #     if ball.dir[0] <= 0:
+        #         Sonic.invin_img.clip_draw(ball.location[0] + ball.real_size[0] * int(ball.frame), ball.location[1],
+        #                             ball.real_size[0], ball.real_size[1], ball.x, ball.y,
+        #                             ball.size[0], ball.size[1])
+        #     else:
+        #         Sonic.invin_img.clip_composite_draw(ball.location[0] + ball.real_size[0] * int(ball.frame), ball.location[1],
+        #                                       ball.real_size[0], ball.real_size[1], 0, 'h', ball.x, ball.y,
+        #                                       ball.size[0], ball.size[1])
+
 
 
 class StateMachine:
@@ -323,6 +342,7 @@ class StateMachine:
 
 class Sonic():
     img = None
+    # invin_img = None
     def __init__(self):
         self.x = 450
         self.y = 100
@@ -332,13 +352,15 @@ class Sonic():
         self.dir = [0, 0]
         self.frame = 0
         self.layer = 6
-        self.coin = 30
+        self.coin = 0
         self.state_machine = StateMachine(self)
         self.state_machine.start()
         self.skill = skill.Skill(self)
         self.skill.start()
         if Sonic.img == None:
             Sonic.img = load_image('../resource/sonic_sprite_sheet(1).png')
+        # if Sonic.invin_img == None:
+        #     Sonic.img = load_image('../resource/invincibility_skill.png')
 
     def draw(self):
         if server.round.who_turn == 'player':

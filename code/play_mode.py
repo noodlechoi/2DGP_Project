@@ -38,7 +38,7 @@ def init():
     pins = [Pin(pin_list[i][0], pin_list[i][1]) for i in range(10)]
     game_world.add_objects(pins, 1)
 
-    server.npc = Knuckles()
+    server.npc = Tails()
     game_world.add_object(server.npc, 6)
 
     server.player = Sonic()

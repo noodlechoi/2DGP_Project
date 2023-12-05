@@ -59,10 +59,12 @@ class UpScore:
 class Invin:
     @staticmethod
     def enter(ball, e):
+        server.is_invin = True
         pass
 
     @staticmethod
     def exit(ball, e):
+        server.is_invin = False
         pass
 
     @staticmethod

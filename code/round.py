@@ -241,12 +241,11 @@ class Round:
                     self.turn -= 1
                 # spare
                 elif self.turn < 2 or (self.is_last and self.turn < 3):
-                    if score[self.cur_round][self.turn] + score[self.cur_round][self.turn + 1] == 10:
-                        self.is_spare = True
-                        self.wait_time = get_time()
+                    if self.turn + 1 in score[self.cur_round]:
+                        if score[self.cur_round][self.turn] + score[self.cur_round][self.turn + 1] == 10:
+                            self.is_spare = True
+                            self.wait_time = get_time()
 
-        print(self.turn)
-        print(self.who_turn)
 
 
 
