@@ -283,7 +283,7 @@ class NPC():
     def draw(self):
         if server.round.who_turn == 'npc':
             self.state_machine.draw()
-            draw_rectangle(*self.get_bb())
+            # draw_rectangle(*self.get_bb())
 
     def update(self):
         if server.round.who_turn == 'npc':

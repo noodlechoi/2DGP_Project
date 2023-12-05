@@ -4,9 +4,11 @@ import game_world
 # pin을 가려주기 위한 클래스
 class RailBar():
     img = None
+    bmg = None
     def __init__(self):
         if RailBar.img == None:
             RailBar.img = load_image('../resource/bowling_rail_bar.png')
+
 
     def draw(self):
         RailBar.img.draw(game_world.WIDTH // 4, game_world.HEIGHT - 100, game_world.WIDTH // 2, game_world.HEIGHT // 4)

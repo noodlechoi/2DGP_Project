@@ -37,7 +37,7 @@ class Ring():
         for frame, value in self.ring_frame.items():
             if int(self.frame) == frame:
                 Ring.img.clip_draw(value['loc'][0], value['loc'][1], value['size'][0], value['size'][1], self.x, self.y, self.size[frame][0], self.size[frame][1])
-        draw_rectangle(*self.get_bb())
+        # draw_rectangle(*self.get_bb())
 
     def get_bb(self):
         return self.x - self.size[int(self.frame)][0] // 2, self.y - self.size[int(self.frame)][1] // 2, self.x + self.size[int(self.frame)][0] // 2, self.y + self.size[int(self.frame)][1] // 2

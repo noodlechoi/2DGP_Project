@@ -27,12 +27,8 @@ layer_place = {2:450, 3:370, 4:300, 5:250}
 random_range = {2:[300, 600], 3:[300, 600], 4:[300, 600], 5:[300, 600]}
 def init():
     global pins
-    global bgm
     global key_img, ring_img, font
     font = load_font('../resource/ENCR10B.TTF', 20)
-    bgm = load_music('../resource/football.mp3')
-    bgm.set_volume(32)
-    bgm.repeat_play()
     key_img = load_image('../resource/키.png')
     ring_img =  load_image('../resource/ring.png')
 

@@ -370,7 +370,7 @@ class Sonic():
         if server.round.who_turn == 'player':
             self.state_machine.draw()
             self.skill.draw()
-            draw_rectangle(*self.get_bb())
+            # draw_rectangle(*self.get_bb())
 
     def update(self):
         if server.round.who_turn == 'player':

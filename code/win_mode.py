@@ -8,8 +8,12 @@ from game_world import WIDTH, HEIGHT, is_conflict
 import game_world
 
 def init():
-    global lose_img
+    global lose_img, bgm
     lose_img = load_image('../resource/win.jpg')
+
+    bgm = load_music('../resource/claps.mp3')
+    bgm.set_volume(32)
+    bgm.repeat_play()
     pass
 
 
